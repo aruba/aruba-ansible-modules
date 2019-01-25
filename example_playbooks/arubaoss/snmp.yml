@@ -1,0 +1,71 @@
+---
+- hosts: switch1
+  gather_facts: False
+  tasks:
+    - name: Configure Public snmp Community
+      arubaoss_snmp:
+        community_name: public
+        access_type: UT_OPERATOR
+        restricted: False
+
+    - name: Configure SNMP Community  public
+      arubaoss_snmp:
+        community_name: public
+        access_type: UT_MANAGER
+        restricted: False
+
+    - name: configure snmp hosts
+      arubaoss_snmp:
+        community_name: public
+        host_ip: "{{item}}"
+        informs: True
+        inform_retries: 10
+        inform_timeout: 20
+      with_items:
+        - 10.1.1.1
+        - 10.2.2.1
+
+    - name: configure snmp hosts Trap Levels
+      arubaoss_snmp:
+        community_name: public
+        host_ip: "{{item.host_ip}}"
+        trap_level: "{{item.trap}}"
+      with_items:
+        - {"host_ip":10.1.1.1,
+           "trap":"STL_ALL"}
+        - {"host_ip":10.2.2.1,
+           "trap":"STL_CRITICAL"}
+
+    - name: Enable snmp traps
+      arubaoss_snmp_trap:
+        mac_move_notify_mode: STM_ENABLE
+        running_conf_change_trap: STM_ENABLE
+        password_change_mgr: STM_ENABLE
+
+    - name: configure snmp host oobm
+      arubaoss_snmp:
+        community_name: public
+        host_ip: 10.1.1.1
+        use_oobm: True
+
+    - name: Delete snmp hosts on public community
+      arubaoss_snmp:
+        community_name: public
+        state: delete
+        host_ip: "{{item}}"
+      with_items:
+        - 10.1.1.1
+        - 10.2.2.1
+
+    - name: Delete snmp community public
+      arubaoss_snmp:
+        community_name: "{{item}}"
+        state: delete
+      with_items:
+        - public
+
+    - name: Disable snmp traps
+      arubaoss_snmp_trap:
+        mac_move_notify_mode: STM_DISABLE
+        running_conf_change_trap: STM_DISABLE
+        password_change_mgr: STM_DISABLE

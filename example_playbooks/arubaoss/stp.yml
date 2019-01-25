@@ -1,0 +1,46 @@
+---
+- hosts: switch1
+  tasks:
+  # Default mode is MSTP
+  - name: Enable Spanning Tree MSTP
+    arubaoss_stp:
+      config: "create"
+      command: config_spanning_tree
+
+  - name: Enable Spanning Tree Rapid-PVST
+    arubaoss_stp:
+      config: "create"
+      command: config_spanning_tree
+      mode: STM_RPVST
+
+  - name: Enable spanning tree port 3 Priority 2
+    arubaoss_stp:
+      port_id: 3
+      priority: 2
+      command: config_spanning_tree_port
+
+  - name: Enable spanning tree port 5 Priority 7
+    arubaoss_stp:
+      port_id: 5
+      priority: 7
+      is_enable_admin_edge_port: True
+      is_enable_bpdu_protection: True
+      is_enable_bpdu_filter: True
+      is_enable_root_guard: True
+      command: config_spanning_tree_port
+
+  - name: Disable root guard and bpdu-protection on spanning tree port 5
+    arubaoss_stp:
+      port_id: 5
+      priority: 7
+      config: "delete"
+      is_enable_admin_edge_port: False
+      is_enable_bpdu_protection: False
+      is_enable_bpdu_filter: False
+      is_enable_root_guard: False
+      command: config_spanning_tree_port
+
+  - name: Disable Spanning Tree MSTP
+    arubaoss_stp:
+      config: "delete"
+      command: config_spanning_tree

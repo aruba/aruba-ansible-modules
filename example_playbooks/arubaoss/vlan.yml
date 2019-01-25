@@ -1,0 +1,73 @@
+---
+- hosts: switch1
+  tasks:
+    - name: Create VLAN 300
+      arubaoss_vlan:
+        vlan_id: 300
+        name: "vlan300"
+        config: "create"
+        command: config_vlan
+
+    - name: Update vlan 300 with ipv4 address
+      arubaoss_vlan:
+        vlan_id: 300
+        config: "create"
+        command: config_vlan_ipaddress
+        vlan_ip_address: "10.10.30.40"
+        vlan_ip_mask: "255.255.255.0"
+
+    - name: Delete vlan 300 ipv4 address
+      arubaoss_vlan:
+        vlan_id: 300
+        config: "delete"
+        command: config_vlan_ipaddress
+        vlan_ip_address: "10.10.30.40"
+        vlan_ip_mask: "255.255.255.0"
+
+    - name: update vlan 300 with dhcp helper address
+      arubaoss_vlan:
+        vlan_id: 300
+        config: "create"
+        command: config_vlan_dhcpHelperAddress
+        helper_addresses: "10.10.10.100"
+
+    - name: delete vlan 300 dhcp helper address
+      arubaoss_vlan:
+        vlan_id: 300
+        config: "delete"
+        command: config_vlan_dhcpHelperAddress
+        helper_addresses: "10.10.10.100"
+
+    # Default port mode is untagged
+    - name: Untag port 2 on vlan 300
+      arubaoss_vlan:
+        vlan_id: 300
+        config: "create"
+        command: config_vlan_port
+        port_id: "2"
+
+    - name: Tag port 3 on vlan 300
+      arubaoss_vlan:
+        vlan_id: 300
+        config: "create"
+        command: config_vlan_port
+        port_id: "3"
+        port_mode: "POM_TAGGED_STATIC"
+
+    - name: Remove all ports from vlan 300
+      arubaoss_vlan:
+        vlan_id: 300
+        config: "delete"
+        command: config_vlan_port
+        port_id: "{{ item.id }}"
+        port_mode: "{{ item.mode }}"
+      with_items:
+        - {id: "2", mode: "POM_UNTAGGED"}
+        - {id: "3", mode: "POM_TAGGED_STATIC"}
+
+    - name: Delete vlan 300
+      arubaoss_vlan:
+        vlan_id: 300
+        name: "vlan300"
+        config: "delete"
+        command: config_vlan

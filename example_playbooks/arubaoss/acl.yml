@@ -1,0 +1,114 @@
+---
+- hosts: switch1
+  gather_facts: False
+  tasks:
+    # Default acl_type is standard
+    - name: Create Standard ACL 'global' w/ 20 permit 0.0.0.0 255.255.255.255
+      arubaoss_acl_policy:
+        acl_name: global
+        sequence_no: 20
+        acl_source_address: 0.0.0.0
+        acl_source_mask: 255.255.255.255
+        acl_action: AA_PERMIT
+
+    - name: Create Extended acl permit_all
+      arubaoss_acl_policy:
+        acl_name: permit_all
+        source_ip_address: 0.0.0.0
+        source_ip_mask: 255.255.255.255
+        destination_ip_address: 0.0.0.0
+        destination_ip_mask: 255.255.255.255
+        acl_action: AA_PERMIT
+        acl_type: AT_EXTENDED_IPV4
+
+    - name: Create Extended acl deny_all
+      arubaoss_acl_policy:
+        acl_name: deny_all
+        source_ip_address: 0.0.0.0
+        source_ip_mask: 255.255.255.255
+        destination_ip_address: 0.0.0.0
+        destination_ip_mask: 255.255.255.255
+        protocol_type: PT_IP
+        acl_action: AA_DENY
+        acl_type: AT_EXTENDED_IPV4
+
+    - name: Create Extended acl deny_all_icmp
+      arubaoss_acl_policy:
+        acl_name: deny_all_icmp
+        source_ip_address: 0.0.0.0
+        source_ip_mask: 255.255.255.255
+        destination_ip_address: 0.0.0.0
+        destination_ip_mask: 255.255.255.255
+        protocol_type: PT_ICMP
+        acl_action: AA_DENY
+        acl_type: AT_EXTENDED_IPV4
+
+    - name: Create Extended acl deny_all_tcp
+      arubaoss_acl_policy:
+        acl_name: deny_all_tcp
+        source_ip_address: 0.0.0.0
+        source_ip_mask: 255.255.255.255
+        destination_ip_address: 0.0.0.0
+        destination_ip_mask: 255.255.255.255
+        protocol_type: PT_TCP
+        acl_action: AA_DENY
+        acl_type: AT_EXTENDED_IPV4
+
+    - name: Add acl global to interface 5 Inbound
+      arubaoss_interface:
+        interface: 5
+        acl_id: global
+        acl_direction: AD_INBOUND
+        acl_type: AT_STANDARD_IPV4
+
+    - name: Add acl deny_all_tcp to interface 2 Outbound
+      arubaoss_interface:
+        interface: 2
+        acl_id: deny_all_tcp
+        acl_direction: AD_OUTBOUND
+        acl_type: AT_EXTENDED_IPV4
+
+    - name: Create Vlan 50
+      arubaoss_vlan:
+        vlan_id: 50
+        name: temp_vlan
+
+    - name: Add ACL deny_all_icmp on vlan 50 Outbound
+      arubaoss_vlan:
+        vlan_id: 50
+        acl_id: deny_all_icmp
+        acl_direction: AD_OUTBOUND
+        acl_type: AT_EXTENDED_IPV4
+        command: config_vlan_acl
+
+    - name: Add ACL on vlan 50 Inbound
+      arubaoss_vlan:
+        vlan_id: 50
+        acl_id: permit_all
+        acl_direction: AD_INBOUND
+        acl_type: AT_EXTENDED_IPV4
+        command: config_vlan_acl
+
+    - name: Delete ACLs on ports
+      arubaoss_interface:
+        interface: "{{ item.port }}"
+        acl_id: "{{item.acl}}"
+        acl_direction: "{{item.dir}}"
+        acl_type: "{{item.type}}"
+        state: delete
+      with_items:
+        - {"port":5,"acl":global,"dir":"AD_INBOUND","type":"AT_STANDARD_IPV4"}
+        - {"port":2,"acl":deny_all_tcp,"dir":"AD_OUTBOUND","type":"AT_EXTENDED_IPV4"}
+
+    - name: Delete ACLs on vlan 50
+      arubaoss_vlan:
+        vlan_id: 50
+        acl_id: "{{item.acl}}"
+        acl_direction: "{{item.dir}}"
+        acl_type: AT_EXTENDED_IPV4
+        command: config_vlan_acl
+        config: delete
+      with_items:
+         - {"acl": deny_all_icmp, "dir": AD_OUTBOUND}
+         - {"acl": permit_all, "dir": AD_INBOUND}
+
