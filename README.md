@@ -4,8 +4,8 @@ All Ansible modules, module installer, and sample playbooks for ArubaOS-Switch a
 ## Structure
 
 * ArubaOS-CX and ArubaOS-Switch Ansible modules and files are stored in aos_wired_module_installer/src.
-* ArubaOS-CX Ansible playbook examples are stored in example_playbooks/arubaoss
-* ArubaOS-Switch Ansible playbook examples are stored in example_playbooks/arubaoscx
+* ArubaOS-CX Ansible playbook examples are stored in example_playbooks/arubaoscx
+* ArubaOS-Switch Ansible playbook examples are stored in example_playbooks/arubaoss
 * Documentation of ArubsOS-CX and ArubaOS-Switch modules are located in module_documentation/ 
 
 # How to Install Modules
