@@ -134,13 +134,8 @@ Description: "This implements rest api's which configure snmp on device"
           use_oobm: "{{item}}"
         with_items:
           - True
-          - True
+          - False
       - name: delete snmp host
-        arubaoss_snmp:
-          community_name: test
-          state: delete
-          host_ip: 10.1.1.1
-      - name: configure snmp host
         arubaoss_snmp:
           community_name: test
           host_ip: 10.1.1.1
