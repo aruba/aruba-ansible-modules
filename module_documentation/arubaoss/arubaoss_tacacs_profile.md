@@ -20,9 +20,13 @@ Description: "This implements rest apis which can be used to configure TACACS Se
     global_auth_key
         description: Authentication key
         required: False
-    server_ip
+    ip_address
         description: TACACS Server IP Address
         required: False
+    version
+        description: Tacacs Server IP Version.
+        choices: "IAV_IP_V4" or "IAV_IP_V6"
+        required True if command=config_tacacs_server
     auth_key
         description: Authentication key
         required: False
