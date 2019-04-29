@@ -1,0 +1,18 @@
+---
+- hosts: switch1
+  gather_facts: False
+  tasks:
+    - name: Configure Interface 11 Description
+      arubaoss_interface:
+        interface: 11
+        description: UPLINK_INTERFACE
+
+    - name: Disable Interface 11
+      arubaoss_interface:
+        interface: 11
+        admin_stat: false
+
+    - name: Enable Interface 11
+      arubaoss_interface:
+        interface: 11
+        admin_stat: true

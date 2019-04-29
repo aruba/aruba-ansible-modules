@@ -1,0 +1,73 @@
+---
+- hosts: switch1
+  gather_facts: False
+  tasks:
+    - name: Create traffic class ignore protocol traffic from source IP to any dest
+      arubaoss_traffic_class:
+        class_name: class_ignore
+        source_ip_address: 10.20.15.1
+        source_ip_mask: 255.255.255.0
+        destination_ip_address: 0.0.0.0
+        destination_ip_mask: 255.255.255.255
+        protocol_type: "{{item}}"
+        entry_type: QTCET_IGNORE
+      loop: [PT_OSPF, PT_ICMP, PT_IGMP, PT_TCP]
+
+    - name: Create traffic class ignore ICMP traffic from any source IP to any dest
+      arubaoss_traffic_class:
+        class_name: class_ignore
+        source_ip_address: 0.0.0.0
+        source_ip_mask: 255.255.255.255
+        destination_ip_address: 0.0.0.0
+        destination_ip_mask: 255.255.255.255
+        protocol_type: PT_ICMP
+        entry_type: QTCET_IGNORE
+
+    - name: Create traffic class match TCP traffic from any source IP to any dest
+      arubaoss_traffic_class:
+        class_name: class_match
+        source_ip_address: 0.0.0.0
+        source_ip_mask: 255.255.255.255
+        destination_ip_address: 0.0.0.0
+        destination_ip_mask: 255.255.255.255
+        protocol_type: PT_ICMP
+        entry_type: QTCET_MATCH
+
+    - name: Create traffic class match IGMP traffic from any source IP to any dest
+      arubaoss_traffic_class:
+        class_name: class_match
+        source_ip_address: 0.0.0.0
+        source_ip_mask: 255.255.255.255
+        destination_ip_address: 0.0.0.0
+        destination_ip_mask: 255.255.255.255
+        protocol_type: PT_IGMP
+        entry_type: QTCET_MATCH
+
+    - name: Attach class ignore to QOS Policy branch1_policy
+      arubaoss_qos_policy:
+        policy_name: branch1_policy
+        class_name: class_ignore
+        action: QPAT_RATE_LIMIT
+        action_value: 1000
+
+    - name: Attach class ignore to QOS Policy branch2_policy
+      arubaoss_qos_policy:
+        policy_name: branch2_policy
+        class_name: class_match
+        action: QPAT_RATE_LIMIT
+        action_value: 1000
+
+    - name: Attach QOS Policy branch2_policy to interface 13
+      arubaoss_interface:
+        interface: 13
+        qos_policy: branch2_policy
+
+    - name: Delete traffic class class_ignore
+      arubaoss_traffic_class:
+        class_name: class_ignore
+        state: delete
+
+    - name: Delete qos policy branch1_policy
+      arubaoss_qos_policy:
+        policy_name: branch1_policy
+        state: delete
