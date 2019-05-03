@@ -10,10 +10,14 @@ Description: "This implements rest api's which configure snmp on device"
     access_type:
         description:
             - Type of access required. Operator or Manager.
+        default: 'UT_OPERATOR'
+        choices: 'UT_OPERATOR','UT_MANAGER'
         required: false
     restricted:
         description:
             - Extent of access restricted or unrestricted
+        default: True
+        choices: True, False
         required: false
     host_ip:
         description:
@@ -22,26 +26,35 @@ Description: "This implements rest api's which configure snmp on device"
     version:
         description:
             - Host IP address version
+        default: 'IAV_IP_V4'
         required: false
     informs:
         description:
             - Enable/disables informs to host
+        default: False
+        choices: True, False
         required: false
     inform_timeout:
         description:
             - Timeout for informs
+        default: 15
         required: false
     inform_retires:
         description:
             - Retries required for informs
+        default: 3
         required: false
     trap_level:
         description:
             - Trap level for host
+        default: 'STL_NONE'
+        choices: 'STL_ALL', 'STL_CRITICAL', 'STL_NOT_INFO', 'STL_DEBUG', 'STL_NONE'
         required: false
     use_oobm:
         description:
             - Enable/disable oobm port usage
+        default: False
+        choices: True, False
         required: false
     location:
         description:
@@ -140,11 +153,6 @@ Description: "This implements rest api's which configure snmp on device"
           community_name: test
           state: delete
           host_ip: 10.1.1.1
-      - name: configure snmp host
-        arubaoss_snmp:
-          community_name: test
-          host_ip: 10.1.1.1
-          state : delete
       - name: delete snmp community
         arubaoss_snmp:
           community_name: test
