@@ -1,0 +1,16 @@
+- name: Create and configure a Virtual AP Profile
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_files:
+    - variables.txt
+  tasks:
+    - name: Create a vlan
+      arubaos_controller_config:
+        host: "{{ mm_ip }}"
+        username: "{{ mm_username }}"
+        password: "{{ mm_password }}"
+        method: "{{ method_type }}"
+        api_name: int_vlan
+        config_path: "{{ configuration_path }}"
+        data: { "id": "{{ vlan_id }}", "int_vlan_ip": {"ipaddr": "{{ vlan_ip_address }}", "ipmask": "{{ ip_mask }}" }}

@@ -1,0 +1,16 @@
+- name: Create Syslog server
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_files:
+    - variables.txt
+  tasks:
+    - name: Create a new Syslog server config
+      arubaos_controller_config:
+        host: "{{ mm_ip }}"
+        username: "{{ mm_username }}"
+        password: "{{ mm_password }}"
+        method: "{{ method_type }}"
+        config_path: "{{ configuration_path }}"
+        api_name: log_lvl_syslog_ipv4_options
+        data: { "ipaddr": "1.2.3.4", "type": true, "log_type": "network", "facility": true, "fac": "local0", "severity": true, "lvl_severity": "alerts", "format": true, "format_type": "cef"}

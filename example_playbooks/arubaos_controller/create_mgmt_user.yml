@@ -1,0 +1,16 @@
+- name: Create and configure a Virtual AP Profile
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_files:
+    - variables.yml
+  tasks:
+    - name: Create a vlan
+      arubaos_controller_config:
+        host: "{{ mm_ip }}"
+        username: "{{ mm_username }}"
+        password: "{{ mm_password }}"
+        method: "{{ method_type }}"
+        api_name: mgmt_user_cfg_int
+        config_path: "{{ configuration_path }}"
+        data: { "path": "", "username": "{{ mgmt_username }}", "rolename": "{{ mgmt_userrole }}", "password": "{{ mgmt_userpassword }}" }

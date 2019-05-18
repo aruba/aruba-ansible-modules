@@ -1,0 +1,14 @@
+- name: Create and configure a SSID Profile
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Create a ssid profile with essid and opmode
+      arubaos_controller_config:
+        host: <mm-ip>
+        username: <mm-username>
+        password: <mm-password>
+        method: POST
+        config_path: <config_path>
+        api_name: ssid_prof
+        data: { "profile-name": "test_dot1x", "essid":{"essid":"test_dot1x"}, "opmode":{"wpa2-aes":true} }
