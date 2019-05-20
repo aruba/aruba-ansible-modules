@@ -1,5 +1,5 @@
 # aruba-ansible-modules
-All Ansible modules, module installer, and sample playbooks for ArubaOS-Switch and ArubaOS-CX.
+All Ansible modules, module installer, and example playbooks for Aruba Switching and WLAN products.
 
 ## Structure
 
