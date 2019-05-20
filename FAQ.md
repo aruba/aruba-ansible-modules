@@ -165,3 +165,26 @@ Follow the below steps to resolve this issue:
             api_version: v6.0
         ```
 
+* I want to have the modules use SSL or HTTPS only, how do I do that? :
+    * The modules accept a parameter `use_ssl`, and when set to `True`, that task will use HTTPS and port 443 
+    when executing the REST API calls. To have the modules use SSL or HTTPS, set `use_ssl` to `True` for each 
+    module call. At this time the modules use HTTP to gather the supported REST API versions of the device,
+    so you'll also have to pass in the `api_version` to each module as well:
+    ```yaml
+     - name: Update Switch System Attributes
+       arubaoss_system_attributes:
+         hostname: "Edge-AOSS-1"
+         location: "Santa Clara"
+         contact: "9253237651"
+         domain_name: "hpe.com"
+         api_version: v5.0
+         use_ssl: True
+       
+     - name: Configure Public snmp Community
+       arubaoss_snmp:
+         community_name: public
+         access_type: UT_OPERATOR
+         restricted: False
+         api_version: v5.0
+         use_ssl: True
+     ```  

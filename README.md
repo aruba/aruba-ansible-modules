@@ -3,32 +3,19 @@ All Ansible modules, module installer, and sample playbooks for ArubaOS-Switch a
 
 ## Structure
 
-* ArubaOS-CX and ArubaOS-Switch Ansible modules and files are stored in [aruba_module_installer/library](https://github.com/aruba/aruba-ansible-modules/tree/master/aruba_module_installer/library).
-* Documentation of ArubsOS-CX and ArubaOS-Switch modules are located in [module_documentation/](https://github.com/aruba/aruba-ansible-modules/tree/master/module_documentation) 
+* Aruba Switching and WLAN Ansible modules and files are stored in [aruba_module_installer/library](https://github.com/aruba/aruba-ansible-modules/tree/master/aruba_module_installer/library).
+* Documentation of Switching and WLAN Ansible modules are located in [module_documentation/](https://github.com/aruba/aruba-ansible-modules/tree/master/module_documentation) 
 * Frequently Asked Questions are located in [FAQ.md](https://github.com/aruba/aruba-ansible-modules/blob/master/FAQ.md)
-* ArubaOS-CX Ansible playbook examples are stored in example_playbooks/arubaoscx
-* ArubaOS-Switch Ansible playbook examples are stored in example_playbooks/arubaoss
+* Aruba Switching and WLAN Ansible playbook examples are stored in [example_playbooks/](https://github.com/aruba/aruba-ansible-modules/tree/master/example_playbooks)
 
 # How to Install Modules
-The aruba_module_installer.py tool installs all files/directories required by Ansible for Aruba-OS Switch and CX integration.
+The aruba_module_installer.py tool installs all files/directories required by Ansible for Aruba Switching and WLAN integration.
 
 ## Requirements
 
 * Linux operating system
-* Python 2.7
+* Python 2.7 or 3.5+
 * Ansible version 2.5 or later
-
-## Files/Directories Installed
-
-* Directories added:
-  * <ansible_module_path>/modules/network/arubaoss
-  * <ansible_module_path>/modules/network/arubaoscx
-  * <ansible_module_path>/module_utils/network/arubaoss
-* Files added/modified:
-  * <ansible_module_path>/plugins/action/arubaoss.py
-  * <ansible_module_path>/plugins/connection/arubaoscx_rest.py
-  * <ansible_module_path>/config/base.yml
-
 
 
 ## How to run this code
@@ -42,7 +29,7 @@ $ sudo python aruba_module_installer.py
 ```
 
 In order to run these scripts, please complete the steps below:
-1. Install Python version 2.7 on the system.
+1. Install Python version 2.7 or 3.5+ on the system.
 
 2. Install Ansible 2.5 or later (refer https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html).
  
@@ -57,7 +44,7 @@ optional arguments:
   --switch      only install files/directories required for ArubaOS-Switch.
 ```
 
-# How to Run a Playbook
+# How to Run a Playbook on ArubaOS-Switch or ArubaOS-CX Device
 Below you'll find step by step instructions on how to run an example playbook on your ArubaOS-Switch or CX device.
 ## Prerequisites
 Follow the above steps to install the ArubaOS-CX and ArubaOS-Switch Ansible modules.
