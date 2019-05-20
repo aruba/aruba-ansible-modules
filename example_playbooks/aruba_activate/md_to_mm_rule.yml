@@ -1,0 +1,15 @@
+- name: Add a new Rule
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_files:
+    - variables_activate.txt
+  tasks:
+    - name: Add MD to MM config Rule
+      arubaactivate_config:
+        credential_0: "{{ activate_username }}"
+        credential_1: "{{ activate_password }}"
+        method: "{{ api_method }}"
+        api_name: "rule"
+        api_action: "update"
+        data: 'json={ "rules": [ { "ruleName": "md_to_mm_rule", "parentFolderId": "4d4b127e-a7ab-4d89-9e07-508c3b529975", "ruleType": "provision", "provisionType": "managednode_2_mc", "configNodePath": "/md/aruba/MC1", "controllerIp": "10.127.16.10", "countryCode":"United States" }]}'

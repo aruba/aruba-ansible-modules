@@ -3,13 +3,14 @@ All Ansible modules, module installer, and sample playbooks for ArubaOS-Switch a
 
 ## Structure
 
-* ArubaOS-CX and ArubaOS-Switch Ansible modules and files are stored in aos_wired_module_installer/src.
+* ArubaOS-CX and ArubaOS-Switch Ansible modules and files are stored in [aruba_module_installer/library](https://github.com/aruba/aruba-ansible-modules/tree/master/aruba_module_installer/library).
+* Documentation of ArubsOS-CX and ArubaOS-Switch modules are located in [module_documentation/](https://github.com/aruba/aruba-ansible-modules/tree/master/module_documentation) 
+* Frequently Asked Questions are located in [FAQ.md](https://github.com/aruba/aruba-ansible-modules/blob/master/FAQ.md)
 * ArubaOS-CX Ansible playbook examples are stored in example_playbooks/arubaoscx
 * ArubaOS-Switch Ansible playbook examples are stored in example_playbooks/arubaoss
-* Documentation of ArubsOS-CX and ArubaOS-Switch modules are located in module_documentation/ 
 
 # How to Install Modules
-The aos_wired_module_installer.py tool installs all files/directories required by Ansible for Aruba-OS Switch and CX integration.
+The aruba_module_installer.py tool installs all files/directories required by Ansible for Aruba-OS Switch and CX integration.
 
 ## Requirements
 
@@ -33,11 +34,11 @@ The aos_wired_module_installer.py tool installs all files/directories required b
 ## How to run this code
 From command line:    
 ```bash
-$ python aos_wired_module_installer.py
+$ python aruba_module_installer.py
 ```
 If you receive a permission error, use 'sudo':
 ```bash
-$ sudo python aos_wired_module_installer.py
+$ sudo python aruba_module_installer.py
 ```
 
 In order to run these scripts, please complete the steps below:
@@ -50,6 +51,8 @@ In order to run these scripts, please complete the steps below:
 optional arguments:
   -h, --help    show this help message and exit
   -r, --remove  remove all files & directories installed by this script.
+  --reinstall   remove all files & directories installed by this script. Then
+                re-install.
   --cx          only install files/directories required for ArubaOS-CX.
   --switch      only install files/directories required for ArubaOS-Switch.
 ```

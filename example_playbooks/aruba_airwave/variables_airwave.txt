@@ -1,0 +1,4 @@
+airwave_ip: "<airwave-ip>"
+airwave_username: "<airwave-username>"
+airwave_password: "<airwave-password>"
+method_type: "<http-method>"

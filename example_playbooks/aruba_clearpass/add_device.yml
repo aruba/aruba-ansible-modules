@@ -1,0 +1,16 @@
+- name: Add a new Device as NAD
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_files:
+    - variables_clearpass.txt
+
+  tasks:
+    - name: Add a Device
+      arubaclearpass_config:
+        host: "{{ clearpass_ip }}"
+        client_id: "{{ clearpass_client_id }}"
+        client_secret: "{{ clearpass_client_secret }}"
+        method: "{{ clearpass_method }}"
+        api_name: network-device
+        data: { "name": "new_switch", "ip_address": "1.1.1.1", "radius_secret": "aruba123", "vendor_name": "Aruba" }

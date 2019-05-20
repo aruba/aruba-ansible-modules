@@ -1,0 +1,14 @@
+- name: Create and configure a Virtual AP Profile
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Create a vap and add ssid, aaa, vlan to itss
+      arubaos_controller_config:
+        host: <mm-ip>
+        username: <mm-username>
+        password: <mm-password>
+        method: POST
+        api_name: virtual_ap
+        config_path: <config-path>
+        data: { "profile-name": "test_vap" ,"aaa_profile": {"profile-name": "test_dot1x"}, "ssid_prof": {"profile-name":"test_dot1x"},"vlan":{"vlan":"1"}}

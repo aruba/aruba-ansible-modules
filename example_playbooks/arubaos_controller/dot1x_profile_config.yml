@@ -1,0 +1,14 @@
+- name: Create and configure a dot1x profile
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Create an apgroup
+      arubaos_controller_config:
+        host: <mm-ip>
+        username: <mm-username>
+        password: <mm-password>
+        method: POST
+        config_path: <config_path>
+        api_name: dot1x_auth_profile
+        data: { "profile-name": "jay_test_dot1x" }

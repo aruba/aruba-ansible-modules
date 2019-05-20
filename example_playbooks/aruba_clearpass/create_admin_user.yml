@@ -1,0 +1,16 @@
+- name: Add a new Authentication Method
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_files:
+    - variables_clearpass.txt
+
+  tasks:
+    - name: Add an Auth Method
+      arubaclearpass_config:
+        host: "{{ clearpass_ip }}"
+        client_id: "{{ clearpass_client_id }}"
+        client_secret: "{{ clearpass_client_secret }}"
+        method: "{{ clearpass_method }}"
+        api_name: admin-user
+        data: { "name": "Test User", "user_id": "test_user", "password": "admin123", "privilege_level": "Help Desk" }

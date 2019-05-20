@@ -1,0 +1,5 @@
+mm_ip: <controller-ip-address>
+mm_username: <controller-username>
+mm_password: <controller-password>
+method_type: <Http-method>
+configuration_path: <controller-config-node-path>

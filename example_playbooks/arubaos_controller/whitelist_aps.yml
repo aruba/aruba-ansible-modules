@@ -1,0 +1,16 @@
+- name: Create and configure a Virtual AP Profile
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_files:
+    - variables.yml
+  tasks:
+    - name: Whitelist an AP
+      arubaos_controller_config:
+        host: "{{ mm_ip }}"
+        username: "{{ mm_username }}"
+        password: "{{ mm_password }}"
+        method: "{{ method_type }}"
+        api_name: wdb_cpsec_add_mac
+        config_path: "{{ configuration_path }}"
+        data: { "name": "{{ ap_mac_1 }}","ap_group": "{{ ap_group }}","ap_name": "{{ ap_name }}","description": "{{ description }}" }

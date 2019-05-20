@@ -1,0 +1,14 @@
+- name: Create and configure an interface vlan
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Assign IP to vlan
+      arubaos_controller_config:
+        host: <mm-ip>
+        username: <mm-username>
+        password: <mm-password>
+        method: POST
+        config_path: <config_path>
+        api_name: int_vlan
+        data: { "id": <vlan-id> , "int_vlan_ip": {"ipaddr": "<ip-addr>", "ipmask": "<mask>", "ipparams": "ipaddrmask"} }

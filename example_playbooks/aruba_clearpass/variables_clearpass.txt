@@ -1,0 +1,4 @@
+clearpass_ip: "<clearpass-ip>"
+clearpass_client_id: "<client-id-given-through-GUI>"       #to be created manually on Clearpass guest page(Administration>API Services>API Clients>Create API Client>Grant type=Client credentials)
+clearpass_client_secret: "<client-secret-from-GUI>"         #This will be generated for the first time when a new API client is created. Make sure you note this client secret, as it won't be visible afterwards
+clearpass_method: "<http-method>"

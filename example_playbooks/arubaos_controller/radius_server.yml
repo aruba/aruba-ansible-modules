@@ -1,0 +1,14 @@
+- name: Create an Authentication Server
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Add a radius server
+      arubaos_controller_config:
+        host: <mm-ip>
+        username: <mm-username>
+        password: <mm-password>
+        method: POST
+        config_path: <config_path>
+        api_name: rad_server
+        data: { "rad_server_name": "test_radius_server" ,"rad_host": {"host": "<radius-server-ip>"}, "rad_key":{"key": "<change-me>"} }

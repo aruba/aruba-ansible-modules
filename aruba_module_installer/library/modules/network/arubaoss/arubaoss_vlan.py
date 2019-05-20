@@ -68,7 +68,7 @@ options:
         description:  Whether DSNOOP is enabled
         required: false
     is_dhcp_server_enabled:
-        description:  Whether DHCP server is enabled, Parameter currently disabled due to issue#10
+        description:  Whether DHCP server is enabled
         required: false
     is_management_vlan:
         description:  Whether vlan is a management vlan or not
@@ -357,7 +357,7 @@ def config_vlan(module):
     data['is_jumbo_enabled'] = params['is_jumbo_enabled']
     data['is_voice_enabled'] = params['is_voice_enabled']
     data['is_dsnoop_enabled'] = params['is_dsnoop_enabled']
-    #data['is_dhcp_server_enabled'] = params['is_dhcp_server_enabled']      Parameter currently disabled due to issue#10
+    #data['is_dhcp_server_enabled'] = params['is_dhcp_server_enabled']
     data['is_management_vlan'] = params['is_management_vlan']
 
     config_url = "/vlans/" + str(params['vlan_id'])
@@ -499,7 +499,7 @@ def run_module():
         is_jumbo_enabled=dict(type='bool', required=False, default=False),
         is_voice_enabled=dict(type='bool', required=False, default=False),
         is_dsnoop_enabled=dict(type='bool', required=False, default=False),
-        is_dhcp_server_enabled=dict(type='bool', required=False, default=False),
+        is_dhcp_server_enabled=dict(type='bool', required=False, default=None),
         is_management_vlan=dict(type='bool', required=False, default=False),
         vlan_ip_address=dict(type='str', required=False, default=""),
         vlan_ip_mask=dict(type='str', required=False, default=""),
