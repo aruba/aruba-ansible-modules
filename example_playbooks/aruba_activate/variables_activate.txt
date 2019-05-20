@@ -1,0 +1,3 @@
+activate_username: "<activagte-username>"
+activate_password: "<activate-password>"
+api_method: "<http-method>"

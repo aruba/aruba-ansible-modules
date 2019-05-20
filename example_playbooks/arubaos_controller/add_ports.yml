@@ -1,0 +1,14 @@
+- name: Create and configure a ports on the controller
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Add ports
+      arubaos_controller_config:
+        host: <mm-ip>
+        username: <mm-username>
+        password: <mm-password>
+        method: POST
+        config_path: <config_path>
+        api_name: int_gig
+        data: [{"slot/module/port": "0/0/1"}, {"slot/module/port": "0/0/2"}]

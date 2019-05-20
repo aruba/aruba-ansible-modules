@@ -35,11 +35,14 @@ SW_PATHS = {'module': 'modules/network/arubaoss',
             'module_utils': 'module_utils/network/arubaoss',
             'plugins_action': 'plugins/action/arubaoss.py',
             }
-
+CONTROLLER_PATHS = {'module': 'modules/network/arubaos_controller'}
+AIRWAVE_PATHS = {'module': 'modules/network/aruba_airwave'}
+CLEARPASS_PATHS = {'module': 'modules/network/aruba_clearpass'}
+ACTIVATE_PATHS = {'module': 'modules/network/aruba_activate'}
 
 CMD = 'ansible --version'
 
-SRC_PATH = dirname(realpath(__file__))+'/src/'
+SRC_PATH = dirname(realpath(__file__))+'/library/'
 
 
 def define_arguments():
@@ -74,6 +77,10 @@ def define_arguments():
                         help=('remove all files & directories installed '
                               'by this script.'),
                         action='store_true')
+    parser.add_argument('--reinstall', required=False,
+                        help=('remove all files & directories installed '
+                              'by this script. Then re-install.'),
+                        action='store_true')
 
     group = parser.add_mutually_exclusive_group(required=False)
     group.add_argument('--cx', required=False,
@@ -85,6 +92,26 @@ def define_arguments():
     group.add_argument('--switch', required=False,
                        help=('only install files/directories required for '
                              'ArubaOS-Switch.'
+                             ),
+                       action='store_true')
+    group.add_argument('--controller', required=False,
+                       help=('only install files/directories required for '
+                             'ArubaOS-Controller.'
+                             ),
+                       action='store_true')
+    group.add_argument('--activate', required=False,
+                       help=('only install files/directories required for '
+                             'Aruba-Activate.'
+                             ),
+                       action='store_true')
+    group.add_argument('--airwave', required=False,
+                       help=('only install files/directories required for '
+                             'Aruba-Airwave.'
+                             ),
+                       action='store_true')
+    group.add_argument('--clearpass', required=False,
+                       help=('only install files/directories required for '
+                             'Aruba-ClearPass.'
                              ),
                        action='store_true')
     return parser.parse_args()
@@ -102,9 +129,9 @@ def find_module_path():
     output = check_output(CMD, shell=True).strip()
 
     re_path = search(r"ansible python module location = (?P<path>\S+)",
-                     output)
+                     output.decode('utf-8'))
 
-    re_version = search(r"ansible\s(?P<version>\d\S+\d)", output)
+    re_version = search(r"ansible\s(?P<version>\d\S+\d)", output.decode('utf-8'))
 
     if re_path and re_version:
 
@@ -227,6 +254,39 @@ def install_sw_modules():
                              'Ansible 2.5 or later...\n'
                              'Modification of {} failed...'.format(base_yml)))
 
+def install_wlan_modules(install_package=None):
+    """
+    Installs files/directories required by Ansible for Aruba Wlan integration.
+    Provide the argument to install a specific package during script execution.
+
+    Directories added to the path:
+        <ansible_module_path>/modules/network/
+
+    :return: None
+    """
+
+    path_list = [CONTROLLER_PATHS, AIRWAVE_PATHS, CLEARPASS_PATHS,
+                 ACTIVATE_PATHS]
+    ans_path = find_module_path()
+
+    #If an argument is specified, install only that package.
+    #Otherwise installs all the packages
+    if install_package and install_package != '':
+        path_list = [install_package]
+
+    # Copy each directory and file to ansible module location
+    for aPath in path_list:
+        for source, path in aPath.items():
+            # If directories or files exist already, do nothing
+            if exists(ans_path+path):
+                print(COLORRED.format('{} already exists'
+                                      ' at {}...\n'.format(path, ans_path+path)))
+            else:
+                print('Copying {} to {}...\n'.format(path, ans_path+path))
+                if isdir(SRC_PATH+path):
+                    copytree(SRC_PATH+path, ans_path+path)
+                else:
+                    copyfile(SRC_PATH+path, ans_path+path)
 
 def remove_modules():
     """
@@ -246,12 +306,14 @@ def remove_modules():
     """
 
     global CX_PATHS, SW_PATHS, SRC_PATH, COLORRED
+    path_list = [CONTROLLER_PATHS, AIRWAVE_PATHS, CLEARPASS_PATHS,
+                 ACTIVATE_PATHS] + [CX_PATHS, SW_PATHS]
 
     ans_path = find_module_path()
 
     base_yml = ans_path+'config/base.yml'
 
-    for type in [CX_PATHS, SW_PATHS]:
+    for type in path_list:
         # Copy each directory and file to ansible module location
         for source, path in type.items():
             # If directories or files exist already, do nothing
@@ -310,13 +372,27 @@ if __name__ == "__main__":
 
         if args.remove:
             remove_modules()
+        elif args.reinstall:
+            remove_modules()
+            install_cx_modules()
+            install_sw_modules()
+            install_wlan_modules()
         elif args.cx:
             install_cx_modules()
         elif args.switch:
             install_sw_modules()
+        elif args.controller:
+            install_wlan_modules(install_package=CONTROLLER_PATHS)
+        elif args.airwave:
+            install_wlan_modules(install_package=AIRWAVE_PATHS)
+        elif args.clearpass:
+            install_wlan_modules(install_package=CLEARPASS_PATHS)
+        elif args.activate:
+            install_wlan_modules(install_package=ACTIVATE_PATHS)
         else:
             install_cx_modules()
             install_sw_modules()
+            install_wlan_modules()
 
     except (OSError, IOError) as e:
         if (e[0] == errno.EACCES):

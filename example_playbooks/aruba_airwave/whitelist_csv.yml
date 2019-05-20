@@ -1,0 +1,18 @@
+- name: Upload whitelist csv file to Airwave
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_files:
+    - variables_airwave.txt
+  vars:
+    csv_file_content: "{{ lookup('file', 'config/aos-switch-csv.csv') }}"
+
+  tasks:
+    - name: Upload csv file
+      arubaairwave_config:
+        host: "{{ airwave_ip }}"
+        credential_0: "{{ airwave_username }}"
+        credential_1: "{{ airwave_password }}"
+        method: "{{ method_type }}"
+        api_name: api/ap_whitelist_upload
+        data: "csv={{ csv_file_content }}&append_whitelist=0"

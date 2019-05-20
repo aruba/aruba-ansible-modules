@@ -1,0 +1,14 @@
+- name: Create and configure AAA Profile
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Create a aaa prof
+      arubaos_controller_config:
+        host: <mm-ip>
+        username: <mm-username>
+        password: <mm-password>
+        method: POST
+        config_path: <config_path>
+        api_name: aaa_prof
+        data: { "profile-name": "test_dot1x", "auth_profile": {"profile-name" : "test_dot1x"}, "dot1x_server_group": {"srv-group": "test_dot1x"}, "download_role": {} }

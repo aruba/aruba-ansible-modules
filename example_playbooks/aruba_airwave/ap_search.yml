@@ -1,0 +1,16 @@
+- name: Get AP details
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_files:
+    - variables_airwave.txt
+
+  tasks:
+    - name: AP search query
+      arubaairwave_config:
+        host: "{{ airwave_ip }}"
+        credential_0: "{{ airwave_username }}"
+        credential_1: "{{ airwave_password }}"
+        method: GET
+        api_name: ap_search.xml
+        params: { "query" : "cf:32"}

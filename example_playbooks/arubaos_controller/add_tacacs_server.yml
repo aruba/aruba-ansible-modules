@@ -1,0 +1,16 @@
+- name: Create TACACS server
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_files:
+    - variables.txt
+  tasks:
+    - name: Create a new TACACS server config
+      arubaos_controller_config:
+        host: "{{ mm_ip }}"
+        username: "{{ mm_username }}"
+        password: "{{ mm_password }}"
+        method: "{{ method_type }}"
+        api_name: tacacs_server
+        config_path: "{{ configuration_path }}"
+        data: { "tacacs_server_name": "new_tacacs", "tacacs_host": { "host": "2.2.2.2"}, "tacacs_key": {"key": "aruba123"}}

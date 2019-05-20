@@ -1,0 +1,14 @@
+- name: Move Devices
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_files:
+    - variables_activate.txt
+  tasks:
+    - name: Move devices to a Folder
+      arubaactivate_config:
+        credential_0: "{{ activate_username }}"
+        credential_1: "{{ activate_password }}"
+        method: "{{ api_method }}"
+        api_name: "inventory"
+        data: 'json={ "devices" : [ { "mac" : "94:F1:28:8B:14:10", "deviceName" : "nikunj-Switch12", "deviceFullName" : "Nikunj_Switch_full", "deviceDescription" : "New Long Description", "folderName" : "Nikunj" } ] }'

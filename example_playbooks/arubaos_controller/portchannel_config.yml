@@ -1,0 +1,14 @@
+- name: Create and configure a port channel
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Create a static port channel
+      arubaos_controller_config:
+        host: <mm-ip>
+        username: <mm-username>
+        password: <mm-password>
+        method: POST
+        config_path: <config_path>
+        api_name: int_pc
+        data: {"int_pc_trusted": {},"int_pc_port_mode": {"port_mode": "trunk"},"int_pc_trusted_vlan": {"WORD": "1-4094"},"int_pc_vlan_native": {"vlanId": "1"},"int_pc_access_vlan": {"_action": "noop"},"id": "0","int_pc_allowed_vlan": {"WORD": "1-4094"},"int_pc_add_gig": [{"slot/module/port": "0/0/5"}, {"slot/module/port": "0/0/4"}]}
