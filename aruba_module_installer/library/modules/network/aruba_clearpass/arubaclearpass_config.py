@@ -35,7 +35,7 @@ options:
 """
 EXAMPLES = """
 #Usage Examples
-    - name: Create node /md/branch1 in configuration hierarchy
+    - name: Add a device
       arubaclearpass_config:
         host: 192.168.1.1
         client_id: admin
