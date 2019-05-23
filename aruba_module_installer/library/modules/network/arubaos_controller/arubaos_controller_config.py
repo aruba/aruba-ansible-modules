@@ -138,6 +138,7 @@ def mm_api_call(module, session):
     else:
         url = "https://" + str(host) + ":4343/v1/configuration/object/" + str(api_name) + "?UIDARUBA=" + str(session_token)
 
+    
     # Store the url to module, so we can print the details in case of error
     module.api_call['url'] = url
 
@@ -145,6 +146,9 @@ def mm_api_call(module, session):
         # Data has to be json formatted
         if method == "GET":
             headers = {'Accept': 'application/json', 'Cookie': 'SESSION=' + str(session_token)}
+            if api_name == "showcommand":
+                params = {"command": data["command"], "UIDARUBA": str(session_token)}
+                url = "https://" + str(host) + ":4343/v1/configuration/" + str(api_name) + "?" + urlencode(params)     
             resp = open_url(url, headers=headers, method=method, validate_certs=validate_certs,
                             http_agent=http_agent, follow_redirects=follow_redirects, cookies=cookies)
         else: # method is POST
