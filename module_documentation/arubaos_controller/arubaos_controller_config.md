@@ -43,4 +43,15 @@ Description: "This module implements REST API based configuration(GET/POST) for 
         config_path: "{{ configuration_path }}"
         api_name: vlan_id
         data: { "id": 47 }
+
+    - name: Execute a show version command
+      arubaos_controller_config:
+        host: "{{ mm_ip }}"
+        username: "{{ mm_username }}"
+        password: "{{ mm_password }}"
+        method: "GET"
+        config_path: "{{ configuration_path }}"
+        api_name: showcommand
+        data: { "command": "show version" }
 ```
+
