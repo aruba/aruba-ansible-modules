@@ -44,6 +44,7 @@ CMD = 'ansible --version'
 
 SRC_PATH = dirname(realpath(__file__))+'/library/'
 
+ANS_PATH = ''
 
 def define_arguments():
     """
@@ -139,14 +140,26 @@ def find_module_path():
         re_path = re_path.groupdict()['path']
 
         # Validate Ansible version is supported
-        if '2.5' <= re_version <= '2.7.9':
+        if '2.5' <= re_version <= '2.8.9':
+            if '2.8' <= re_version <= '2.8.9':
+                print(COLORRED.format(('*'*79)+'\n\n\nThe Ansible version 2.8 '
+                                               'is currently not'
+                                      ' supported with AOS-CX modules.\nWe are'
+                                      ' working on resolving this issue.\nFor '
+                                      'these modules to work properly please '
+                                      'use Ansible version 2.7.\n\n\n'+('*'*79)))
             return re_path+'/'
-
-    exit(COLORRED.format('There was an issue finding your '
-                         'ansible version.\n'
-                         'Please run \'ansible --version\' from bash'
-                         ', resolve any errors, and verify version'
-                         ' is release version 2.5 or later.'))
+        else:
+            exit(COLORRED.format('There was an issue with your '
+                                 'ansible version: {}\n'
+                                 'The Aruba Modules support Ansible release '
+                                 'versions 2.5 or later.').format(re_version))
+    else:
+        exit(COLORRED.format('There was an issue finding your '
+                             'ansible version.\n'
+                             'Please run \'ansible --version\' from bash'
+                             ', resolve any errors, and verify version'
+                             ' is release version 2.5 or later.'))
 
 
 def install_cx_modules():
@@ -163,22 +176,20 @@ def install_cx_modules():
     :return: None
     """
 
-    global CX_PATHS, SRC_PATH, COLORRED
-
-    ans_path = find_module_path()
+    global CX_PATHS, SRC_PATH, COLORRED, ANS_PATH
 
     # Copy each directory and file to ansible module location
     for source, path in CX_PATHS.items():
         # If directories or files exist already, do nothing
-        if exists(ans_path+path):
+        if exists(ANS_PATH+path):
             print(COLORRED.format('{} already exists'
-                                  ' at {}...\n'.format(path, ans_path+path)))
+                                  ' at {}...\n'.format(path, ANS_PATH+path)))
         else:
-            print('Copying {} to {}...\n'.format(path, ans_path+path))
+            print('Copying {} to {}...\n'.format(path, ANS_PATH+path))
             if isdir(SRC_PATH+path):
-                copytree(SRC_PATH+path, ans_path+path)
+                copytree(SRC_PATH+path, ANS_PATH+path)
             else:
-                copyfile(SRC_PATH+path, ans_path+path)
+                copyfile(SRC_PATH+path, ANS_PATH+path)
 
 
 def install_sw_modules():
@@ -198,24 +209,22 @@ def install_sw_modules():
     :return: None
     """
 
-    global SW_PATHS, SRC_PATH, COLORRED
+    global SW_PATHS, SRC_PATH, COLORRED, ANS_PATH
 
-    ans_path = find_module_path()
-
-    base_yml = ans_path+'config/base.yml'
+    base_yml = ANS_PATH+'config/base.yml'
 
     # Copy each directory and file to ansible module location
     for source, path in SW_PATHS.items():
         # If directories or files exist already, do nothing
-        if exists(ans_path+path):
+        if exists(ANS_PATH+path):
             print(COLORRED.format('{} already exists'
-                                  ' at {}...\n'.format(path, ans_path+path)))
+                                  ' at {}...\n'.format(path, ANS_PATH+path)))
         else:
-            print('Copying {} to {}...\n'.format(path, ans_path+path))
+            print('Copying {} to {}...\n'.format(path, ANS_PATH+path))
             if isdir(SRC_PATH+path):
-                copytree(SRC_PATH+path, ans_path+path)
+                copytree(SRC_PATH+path, ANS_PATH+path)
             else:
-                copyfile(SRC_PATH+path, ans_path+path)
+                copyfile(SRC_PATH+path, ANS_PATH+path)
 
     # Modifies base.yml to include arubaoss modules
     # If base.yml doesn't exist, invalid ansible version is installed
@@ -254,6 +263,7 @@ def install_sw_modules():
                              'Ansible 2.5 or later...\n'
                              'Modification of {} failed...'.format(base_yml)))
 
+
 def install_wlan_modules(install_package=None):
     """
     Installs files/directories required by Ansible for Aruba Wlan integration.
@@ -265,9 +275,10 @@ def install_wlan_modules(install_package=None):
     :return: None
     """
 
+    global ANS_PATH
+
     path_list = [CONTROLLER_PATHS, AIRWAVE_PATHS, CLEARPASS_PATHS,
                  ACTIVATE_PATHS]
-    ans_path = find_module_path()
 
     #If an argument is specified, install only that package.
     #Otherwise installs all the packages
@@ -278,15 +289,16 @@ def install_wlan_modules(install_package=None):
     for aPath in path_list:
         for source, path in aPath.items():
             # If directories or files exist already, do nothing
-            if exists(ans_path+path):
+            if exists(ANS_PATH+path):
                 print(COLORRED.format('{} already exists'
-                                      ' at {}...\n'.format(path, ans_path+path)))
+                                      ' at {}...\n'.format(path, ANS_PATH+path)))
             else:
-                print('Copying {} to {}...\n'.format(path, ans_path+path))
+                print('Copying {} to {}...\n'.format(path, ANS_PATH+path))
                 if isdir(SRC_PATH+path):
-                    copytree(SRC_PATH+path, ans_path+path)
+                    copytree(SRC_PATH+path, ANS_PATH+path)
                 else:
-                    copyfile(SRC_PATH+path, ans_path+path)
+                    copyfile(SRC_PATH+path, ANS_PATH+path)
+
 
 def remove_modules():
     """
@@ -305,28 +317,26 @@ def remove_modules():
     :return: None
     """
 
-    global CX_PATHS, SW_PATHS, SRC_PATH, COLORRED
+    global CX_PATHS, SW_PATHS, SRC_PATH, COLORRED, ANS_PATH
     path_list = [CONTROLLER_PATHS, AIRWAVE_PATHS, CLEARPASS_PATHS,
                  ACTIVATE_PATHS] + [CX_PATHS, SW_PATHS]
 
-    ans_path = find_module_path()
-
-    base_yml = ans_path+'config/base.yml'
+    base_yml = ANS_PATH+'config/base.yml'
 
     for type in path_list:
         # Copy each directory and file to ansible module location
         for source, path in type.items():
             # If directories or files exist already, do nothing
-            if exists(ans_path+path):
-                if isdir(ans_path+path):
-                    rmtree(ans_path + path)
+            if exists(ANS_PATH+path):
+                if isdir(ANS_PATH+path):
+                    rmtree(ANS_PATH + path)
                 else:
-                    remove(ans_path + path)
-                print('{} removed...'.format(ans_path + path))
+                    remove(ANS_PATH + path)
+                print('{} removed...'.format(ANS_PATH + path))
 
             else:
                 print(COLORRED.format('{} does not exist at '
-                                      '{}...\n'.format(path, ans_path + path)))
+                                      '{}...\n'.format(path, ANS_PATH + path)))
 
     # Modifies base.yml to include arubaoss modules
     # If base.yml doesn't exist, invalid ansible version is installed
@@ -370,6 +380,8 @@ if __name__ == "__main__":
 
     try:
 
+        ANS_PATH = find_module_path()
+
         if args.remove:
             remove_modules()
         elif args.reinstall:
@@ -393,6 +405,8 @@ if __name__ == "__main__":
             install_cx_modules()
             install_sw_modules()
             install_wlan_modules()
+        # Prints warning message in case of Ansible 2.8 version
+        find_module_path()
 
     except (OSError, IOError) as e:
         if (e[0] == errno.EACCES):
@@ -403,13 +417,13 @@ if __name__ == "__main__":
                                      "these files/directories.\n\n"
                                      "re-run the installer using\n"
                                      "sudo python"
-                                     "aos_wired_module_installer.py -r"))
+                                     "aruba_module_installer.py -r"))
             else:
                 exit(COLORRED.format("You need root permissions to execute "
                                      "this script against "
                                      "these files/directories.\n\n"
                                      "re-run the installer using\n"
                                      "sudo python "
-                                     "aos_wired_module_installer.py"))
+                                     "aruba_module_installer.py"))
         else:
             raise e
