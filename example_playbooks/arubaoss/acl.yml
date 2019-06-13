@@ -6,7 +6,6 @@
     - name: Create Standard ACL 'global' w/ 20 permit 0.0.0.0 255.255.255.255
       arubaoss_acl_policy:
         acl_name: global
-        sequence_no: 20
         acl_source_address: 0.0.0.0
         acl_source_mask: 255.255.255.255
         acl_action: AA_PERMIT
