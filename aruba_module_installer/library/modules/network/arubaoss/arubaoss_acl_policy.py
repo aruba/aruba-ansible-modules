@@ -275,27 +275,105 @@ def acl(module):
 
     return result
 
+def check_acl_rule_exists(module):
+    result = False
+    params = module.params
+    acl_id = params['acl_name'] + '~' + params['acl_type']
+    url = '/acls/' + acl_id + '/rules'
+
+    acl_rule = get_config(module, url)
+    if acl_rule:
+        check_config = module.from_json(to_text(acl_rule))
+
+        if check_config['collection_result']['total_elements_count'] == 0:
+            return result
+
+        for ele in check_config['acl_rule_element']:
+            if ele['acl_action'] != params['acl_action']:
+                continue
+            if params['acl_type'] == 'AT_EXTENDED_IPV4':
+		print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                protocol_type = ele['traffic_match']['protocol_type']
+                source_ip_address = ele['traffic_match']['source_ip_address']['octets']
+                source_ip_mask = ele['traffic_match']['source_ip_mask']['octets']
+                destination_ip_address = ele['traffic_match']['destination_ip_address']['octets']
+                destination_ip_mask = ele['traffic_match']['destination_ip_mask']['octets']
+
+                if protocol_type != params['protocol_type'] or \
+                    source_ip_address != params['source_ip_address'] or \
+                    source_ip_mask != params['source_ip_mask'] or \
+                    destination_ip_address != params['destination_ip_address'] or \
+                    destination_ip_mask != params['destination_ip_mask']:
+                        continue
+
+                if params['protocol_type'] == 'PT_ICMP':
+                    if params['icmp_type'] > -1 and ele['traffic_match']['icmp_type']:
+                        if ele['traffic_match']['icmp_type'] != params['icmp_type']:
+                            continue
+                    if params['icmp_code'] > -1 and ele['traffic_match']['icmp_code']:
+                        if ele['traffic_match']['icmp_code'] != params['icmp_code']:
+                            continue
+                elif params['protocol_type'] == 'PT_IGMP':
+                    if params['igmp_type'] and ele['traffic_match']['igmp_type']:
+                        if ele['traffic_match']['igmp_type'] != params['igmp_type']:
+                            continue
+                elif params['protocol_type'] == 'PT_TCP':
+                    if params['is_connection_established'] and ele['traffic_match']['is_connection_established']:
+                        if ele['traffic_match']['is_connection_established'] != params['is_connection_established']:
+                            continue
+                    if params['match_bit'] and ele['traffic_match']['match_bit']:
+                        if ele['traffic_match']['match_bit'] != params['match_bit']:
+                            continue
+                elif params['protocol_type'] in ('PT_SCTP','PT_TCP','PT_UDP'):
+                    if params['source_port'] and ele['traffic_match']['source_port']:
+                        if ele['traffic_match']['source_port'] != params['source_port']:
+                            continue
+                    if params['destination_port'] and ele['traffic_match']['destination_port']:
+                        if ele['traffic_match']['destination_port'] != params['destination_port']:
+                            continue
+                if params['precedence'] and ele['traffic_match']['precedence']:
+                    if ele['traffic_match']['precedence'] != params['precedence']:
+                        continue
+
+                if params['tos'] and ele['traffic_match']['tos']:
+                    if ele['traffic_match']['tos'] != params['tos']:
+                        continue
+                if params['is_log'] is not None and ele['is_log']:
+                    if ele['is_log'] != params['is_log']:
+                        continue
+
+            else:
+
+                if params['acl_source_address'] == 'host':
+                    source_ip_mask = '255.255.255.255'
+                    source_ip_address = '0.0.0.0'
+                else:
+                    source_ip_address = params['acl_source_address']
+                    source_ip_mask = params['acl_source_mask']
+
+                if source_ip_address != ele['std_source_address']['source_ip_address']['octets']:
+                    continue
+                if source_ip_mask != ele['std_source_address']['source_ip_mask']['octets']:
+                    continue
+
+            #Return True as we checked all values found to be matching.
+            return True
+
+    #End of for loop, Searched all entries no match found.
+    return result
 
 def acl_rule(module):
 
     params = module.params
     acl_id = params['acl_name'] + '~' + params['acl_type']
     url = '/acls/' + acl_id + '/rules'
-
     # Create acl if not to apply actions
     if params['state'] == 'create':
         acl(module)
 
-    method = 'POST'
-    if params['sequence_no'] > 0:
-        url = url + '/' + str(params['sequence_no'])
-        method = 'PUT'
-        data = {'sequence_no': params['sequence_no']}
-    else:
-        data = {}
+    data = {}
 
     if params['state'] == 'create':
-
 
         data.update({
             'acl_id': acl_id,
@@ -309,7 +387,6 @@ def acl_rule(module):
             data['is_log'] = params['is_log']
 
         if params['acl_type'] == 'AT_EXTENDED_IPV4':
-
             for key in ['source_ip_address','source_ip_mask','destination_ip_address',
                     'destination_ip_mask']:
                 if params.get(key) == None:
@@ -376,6 +453,7 @@ def acl_rule(module):
 
             if params['is_log'] != None:
                 data['is_log'] = params['is_log']
+
         else:
 
             if params['acl_source_address'] == 'host':
@@ -399,24 +477,34 @@ def acl_rule(module):
                     }
                 })
 
+        #Check idempotency for duplicate ip values
+        if check_acl_rule_exists(module) == True:
+            return {'msg':'ACL Rule entry already present','changed':False}
 
-        acl_config = get_config(module, url)
-        if acl_config:
-            check_config = module.from_json(to_text(acl_config))
-            if params['sequence_no'] == 0:
-                for config in check_config['acl_rule_element']:
-                    if acl_id == config['acl_id']:
-                        return config
-            elif params['sequence_no'] > 0:
-                if acl_id == check_config['acl_id']:
-                    result = run_commands(module, url, data, 'PUT', check=url)
+        # Without sequence_no configuration
+        if params['sequence_no'] == 0:
+            result = run_commands(module, url, data, 'POST')
+            return result
+
+        # With sequence_no configuration
+        else:
+            get_url = url + '/' + str(params['sequence_no'])
+            acl_rule_config = get_config(module, get_url)
+            if acl_rule_config:
+                check_config = module.from_json(to_text(acl_rule_config))
+                if params['sequence_no'] == check_config['sequence_no']:
+                    result = run_commands(module, get_url, data, 'PUT', check=get_url)
                     return result
+            else:
+                data.update({ 'sequence_no': params['sequence_no']})
+                result = run_commands(module, url, data, 'POST')
+                return result
 
-        result = run_commands(module, url, data, method)
     else:
-        if params['sequence_no'] ==0:
+        if params['sequence_no'] == 0:
             return {'msg':'sequence_no is required','changed':False}
 
+        url = url + '/' + str(params['sequence_no'])
         result = run_commands(module, url, {}, 'DELETE',check=url)
 
     return result
@@ -437,7 +525,7 @@ def run_module():
         protocol_type=dict(type='str', required=False, choices=['PT_GRE','PT_ESP',
             'PT_AH','PT_OSPF','PT_PIM','PT_VRRP','PT_ICMP','PTIGMP','PT_IP','PT_SCTP',
             'PT_TCP','PT_UDP']),
-        icmp_type=dict(type='int', required=False, defualt=-1),
+        icmp_type=dict(type='int', required=False, default=-1),
         icmp_code=dict(type='int', required=False, default=-1),
         igmp_type=dict(type='str', required=False, choices=['IT_HOST_QUERY',
             'IT_HOST_REPORT','IT_DVMRP','IT_PIM','IT_TRACE','IT_V2_HOST_REPORT',
