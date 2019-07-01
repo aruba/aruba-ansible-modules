@@ -1,0 +1,14 @@
+- name: Show existing network
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Show existing network as a show command through API
+      arubainstant_config:
+        host: <virtual-controller-ip>
+        username: <virtual-controller-username>
+        password: <virtual-controller-password>
+        method: GET
+        iap_ip_addr: <iap-ip-address>
+        api_type: monitoring
+        api_name: show network
