@@ -39,6 +39,7 @@ CONTROLLER_PATHS = {'module': 'modules/network/arubaos_controller'}
 AIRWAVE_PATHS = {'module': 'modules/network/aruba_airwave'}
 CLEARPASS_PATHS = {'module': 'modules/network/aruba_clearpass'}
 ACTIVATE_PATHS = {'module': 'modules/network/aruba_activate'}
+INSTANT_PATHS = {'module': 'modules/network/aruba_instant'}
 
 CMD = 'ansible --version'
 
@@ -107,12 +108,17 @@ def define_arguments():
                        action='store_true')
     group.add_argument('--airwave', required=False,
                        help=('only install files/directories required for '
-                             'Aruba-Airwave.'
+                             'Aruba-AirWave.'
                              ),
                        action='store_true')
     group.add_argument('--clearpass', required=False,
                        help=('only install files/directories required for '
                              'Aruba-ClearPass.'
+                             ),
+                       action='store_true')
+    group.add_argument('--instant', required=False,
+                       help=('only install files/directories required for '
+                             'Aruba-Instant.'
                              ),
                        action='store_true')
     return parser.parse_args()
@@ -278,7 +284,7 @@ def install_wlan_modules(install_package=None):
     global ANS_PATH
 
     path_list = [CONTROLLER_PATHS, AIRWAVE_PATHS, CLEARPASS_PATHS,
-                 ACTIVATE_PATHS]
+                 ACTIVATE_PATHS, INSTANT_PATHS]
 
     #If an argument is specified, install only that package.
     #Otherwise installs all the packages
@@ -319,7 +325,7 @@ def remove_modules():
 
     global CX_PATHS, SW_PATHS, SRC_PATH, COLORRED, ANS_PATH
     path_list = [CONTROLLER_PATHS, AIRWAVE_PATHS, CLEARPASS_PATHS,
-                 ACTIVATE_PATHS] + [CX_PATHS, SW_PATHS]
+                 ACTIVATE_PATHS, INSTANT_PATHS] + [CX_PATHS, SW_PATHS]
 
     base_yml = ANS_PATH+'config/base.yml'
 
@@ -401,6 +407,8 @@ if __name__ == "__main__":
             install_wlan_modules(install_package=CLEARPASS_PATHS)
         elif args.activate:
             install_wlan_modules(install_package=ACTIVATE_PATHS)
+        elif args.instant:
+            install_wlan_modules(install_package=INSTANT_PATHS)
         else:
             install_cx_modules()
             install_sw_modules()
