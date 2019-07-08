@@ -41,6 +41,18 @@ options:
         decription:
             - dictionary data for the API call
         required: false
+    validate_certs:
+        decription:
+            - (Optional) set to True to validate server SSL certificate upon HTTPS connection. Default option is false
+        required: false
+    client_cert:
+        description: 
+            - (Optional) set the file path for client certificate validation from server side. Default option is None. 
+        required: false
+    client_key:
+        description: 
+            - (Optional) if the client_cert did not have the key, use this parameter. Default option is None.
+        required: false
 """
 EXAMPLES = """
 #Usage Examples
@@ -53,6 +65,7 @@ EXAMPLES = """
         api_name: ssid_prof
         config_path: /md/branch1/building1
         data: { "profile-name": "test_ssid_profile", "essid" :{"essid":"test_employee_ssid"}, "opmode": {"name": "wpa-aes"}}
+        validate_cert: True
 
     - name: Configure a server group profile and add an existing radius server to it
       arubaos_controller_config:
@@ -86,7 +99,9 @@ def login_api_mm(module):
     headers = {'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded'}
     data = urlencode({'username': username, 'password': password})
     cookies = cookiejar.LWPCookieJar()
-    validate_certs = False
+    validate_certs = module.params.get('validate_certs')
+    client_cert = module.params.get('client_cert')
+    client_key = module.params.get('client_key')
     http_agent = 'ansible-httpget'
     follow_redirects = 'urllib2'
     method = "POST"
@@ -95,7 +110,9 @@ def login_api_mm(module):
     module.api_call['url'] = url
 
     try:
-        resp = open_url(url, data=data, headers=headers, method=method, validate_certs=validate_certs, http_agent=http_agent, follow_redirects=follow_redirects, cookies=cookies)
+        resp = open_url(url, data=data, headers=headers, method=method, validate_certs=validate_certs,
+                        http_agent=http_agent, follow_redirects=follow_redirects, cookies=cookies,
+                        client_cert=client_cert, client_key=client_key)
         resp = resp.read()
         result = json.loads(resp)['_global_result']
         if result['status'] == "0":
@@ -124,7 +141,9 @@ def mm_api_call(module, session):
     data = module.params.get('data')
     cookies = cookiejar.LWPCookieJar()
     resp = ""
-    validate_certs = False
+    validate_certs = module.params.get('validate_certs')
+    client_cert = module.params.get('client_cert')
+    client_key = module.params.get('client_key')
     http_agent = 'ansible-httpget'
     follow_redirects = 'urllib2'
     session_token = session['session_token']
@@ -138,7 +157,7 @@ def mm_api_call(module, session):
     else:
         url = "https://" + str(host) + ":4343/v1/configuration/object/" + str(api_name) + "?UIDARUBA=" + str(session_token)
 
-    
+
     # Store the url to module, so we can print the details in case of error
     module.api_call['url'] = url
 
@@ -148,9 +167,10 @@ def mm_api_call(module, session):
             headers = {'Accept': 'application/json', 'Cookie': 'SESSION=' + str(session_token)}
             if api_name == "showcommand":
                 params = {"command": data["command"], "UIDARUBA": str(session_token)}
-                url = "https://" + str(host) + ":4343/v1/configuration/" + str(api_name) + "?" + urlencode(params)     
+                url = "https://" + str(host) + ":4343/v1/configuration/" + str(api_name) + "?" + urlencode(params)
             resp = open_url(url, headers=headers, method=method, validate_certs=validate_certs,
-                            http_agent=http_agent, follow_redirects=follow_redirects, cookies=cookies)
+                            http_agent=http_agent, follow_redirects=follow_redirects, cookies=cookies,
+                            client_cert=client_cert, client_key=client_key)
         else: # method is POST
             headers = {'Accept': 'application/json', 'Content-Type': 'application/json',
                        'Cookie': 'SESSION=' + str(session_token)}
@@ -158,14 +178,22 @@ def mm_api_call(module, session):
             data = json.dumps(data) #converts python object to json string that is readable by Ansible
 
             resp =  open_url(url, data=data, headers=headers, method=method, validate_certs=validate_certs,
-                             http_agent=http_agent, follow_redirects=follow_redirects, cookies=cookies)
+                             http_agent=http_agent, follow_redirects=follow_redirects, cookies=cookies,
+                             client_cert=client_cert, client_key=client_key)
 
         result = json.loads(resp.read())
 
         if method == "POST":
+            # Result will contain "Error" key if the request was made with wrong api name and data
+            if "Error" in result.keys():
+                module.fail_json(changed=False, msg="API Call failed! Check api name and data", reason=result['Error'], api_call=module.api_call)
+
             result = result['_global_result']
             if result['status'] == 0:
                 module.exit_json(changed=True, msg=str(result['status_str']), status_code=int(resp.code))
+            # Skip if result status is either 2 and 1. Example trying to delete something that do not exist will return such status 
+            elif result['status'] == 2 or result['status'] == 1:
+                module.exit_json(skipped=True, msg=str(result['status_str']), status_code=int(resp.code))
             else:
                 module.fail_json(changed=False, msg="API Call failed!", reason=result['status_str'], api_call=module.api_call)
         # if method is GET
@@ -188,7 +216,10 @@ def main():
             api_name=dict(required=True, type='str'),
             method=dict(required=True, type='str', choices=['GET', 'POST']),
             config_path=dict(required=False, type='str'),
-            data=dict(required=False, type='dict')
+            data=dict(required=False, type='dict'),
+            validate_certs=dict(required=False, type="bool", default=False),
+            client_cert=dict(required=False, type="str", default=None),
+            client_key=dict(required=False, type="str", default=None)
         ))
     session = None
     # If session_token is not provided as module argument, call to generate the session_token
