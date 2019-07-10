@@ -31,7 +31,19 @@ Description: "This module implements REST API based configuration(GET/POST) for 
         description: Optional parameters for the API call. Query operations might have additional params to be supplied with the request. 
         type: dict
         required: false 
-        
+    validate_certs:
+        description: Validate the server cert when this option is set to True.
+        type: bool
+        required: false
+    client_cert:
+        description: Optionally provide path to client cert file to validate it in server
+        type: string
+        required: false
+    client_key:        
+        description: If client cert if provided without the key in it, use this parameter
+        type: string
+        required: false
+
 ##### EXAMPLES
 ```YAML
    - name: AP search query
@@ -42,4 +54,5 @@ Description: "This module implements REST API based configuration(GET/POST) for 
         method: GET
         api_name: ap_search.xml
         params: { "query" : "cf:32"}
+        validate_certs: True
 ```

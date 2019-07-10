@@ -27,7 +27,19 @@ Description: "This module implements REST API based configuration(GET/POST) for 
         description: Payload data for the mentioned API endpoint
         type: dict
         required: true 
-        
+    validate_certs:
+        description: Validate server cert if this option is set to True. Default option is False
+        type: bool
+        required: false
+    client_cert:
+        description: Optionally provide path to the client cert file. 
+        type: string
+        required: false
+    client_key:
+        description: If the client cert file is provided without the key in it, use this parameter.
+        type: string
+        required: false
+    
 ##### EXAMPLES
 ```YAML
     - name: Add a Device
@@ -38,4 +50,5 @@ Description: "This module implements REST API based configuration(GET/POST) for 
         method: "{{ clearpass_method }}"
         api_name: network-device
         data: { "name": "new_switch", "ip_address": "1.1.1.1", "radius_secret": "aruba123", "vendor_name": "Aruba" }
+        validate_certs: True
 ```

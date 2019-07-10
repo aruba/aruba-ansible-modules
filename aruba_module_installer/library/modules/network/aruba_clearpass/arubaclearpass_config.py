@@ -1,21 +1,21 @@
 #!/usr/bin/python
 DOCUMENTATION = """
 ---
-module: aruba_clearpass_config
+module: arubaos_cppm_config
 version_added: 0.1
-short_description: Configure Aruba Clearpass using APIs.
+short_description: Call Mobility Master API
 options:
     host:
         decription:
-            - Hostname or IP Address of the Aruba ClearPass
+            - Hostname or IP Address of the Mobility Master.
         required: true
     client_id:
         decription:
-            - client id obtained from the Aruba ClearPass API client
+            - Username used to login to the Mobility Master
         required: true
     client_secret:
         decription:
-            - client secret obtained from the Aruba ClearPass API client
+            - Password used to login to the Mobility Master
         required: true
     api_name:
         decription:
@@ -32,17 +32,28 @@ options:
         decription:
             - JSON encoded data for the API call
         required: false
+    validate_certs:
+        decription:
+            - Validate server certs when this is set to True
+        required: false
+    client_cert:
+        decription: (Optional)Provide the path to client cert file for validation in server side.
+        required: false 
+    client_key:
+        description: If the provided client cert does not have the key in it, use this parameter
+        required: false
 """
 EXAMPLES = """
 #Usage Examples
-    - name: Add a device
-      arubaclearpass_config:
+    - name: Create node /md/branch1 in configuration hierarchy
+      arubaos_cppm_config:
         host: 192.168.1.1
         client_id: admin
         client_secret: aruba123
         api_name: network-device
         method: POST
         data: { "name": "new_switch", "ip_address": "1.1.1.1", "radius_secret": "aruba123", "vendor_name": "Aruba" }
+        validate_certs: True
 """
 
 from ansible.module_utils.basic import *
@@ -57,8 +68,12 @@ def login_cppm(module, host, client_id, client_secret):
     data = {"grant_type": "client_credentials","client_id": client_id,"client_secret": client_secret}
     module.api_call['url'] = url # Store the url to module, so we can print the details in case of error
     module.api_call['login_data'] = data
+    validate_certs=module.params.get('validate_certs')
+    client_cert=module.params.get('client_cert')
+    client_key=module.params.get('client_key')
     try:
-        resp = open_url(url=url, data=json.dumps(data), headers=headers, method="POST", validate_certs=False)
+        resp = open_url(url=url, data=json.dumps(data), headers=headers, method="POST", validate_certs=validate_certs,
+                        client_cert=client_cert, client_key=client_key)
         if resp.code == 200:
             result = json.loads(resp.read())
             access_token = result["access_token"]
@@ -78,18 +93,43 @@ def login_cppm(module, host, client_id, client_secret):
 def cppm_api_call(module, host, access_token, api_name, method='GET', data={}):
     url = "https://" + str(host) + ":443/api/" + str(api_name)
     module.api_call['url'] = url # Store the url to module, so we can print the details in case of error
+    headers = ""
+    resp = ""
+    variableID = ""
+    hard_list = ["user_id", "name", "mac_address"]
+    validate_certs=module.params.get('validate_certs')
+    client_cert=module.params.get('client_cert')
+    client_key=module.params.get('client_key')
     try:
-        if method == "GET":
+        if method == "GET" or method == "DELETE":
             headers = {'Accept': 'application/json', 'Authorization': "Bearer " + access_token}
-            resp = open_url(url=url, headers=headers, method="GET", validate_certs=False)
-        else: # POST
+            resp = open_url(url=url, headers=headers, method=method, validate_certs=validate_certs, 
+                            client_cert=client_cert, client_key=client_key)
+        else: # POST, PATCH
             headers = {'Accept': 'application/json', 'Content-Type': 'application/json',
                           'Authorization': "Bearer " + access_token}
-            resp = open_url(url=url, data=json.dumps(data), headers=headers, method="POST", validate_certs=False)
+            resp = open_url(url=url, data=json.dumps(data), headers=headers, method=method, validate_certs=validate_certs,
+                            client_cert=client_cert, client_key=client_key)
         return resp
     except Exception as e:
         if "422" in str(e):
-            module.exit_json(changed=False, msg=str(e) + "...Entry might exists on ClearPass")
+            if method == "POST":
+                try:
+                    for ele in data.keys():
+                        if ele in hard_list:
+                            variableID = ele
+                            break
+                    if variableID:
+                        ##### Convert _ to -
+                        varIDEdit = variableID.replace("_", "-")
+                        url = "https://" + str(host) + ":443/api/" + str(api_name) + "/" + str(varIDEdit) + "/" + data[variableID]
+                        resp = open_url(url=url, data=json.dumps(data), headers=headers, method="PATCH", validate_certs=validate_certs,
+                                        client_cert=client_cert, client_key=client_key)
+                        return resp
+                    else:
+                        module.exit_json(skipped=True, msg=str(e) + "...Entry might exists on ClearPass")
+                except Exception as err:
+                    module.exit_json(skipped=True, msg=str(err) + "...Entry might exists on ClearPass")
         else:
             module.fail_json(changed=False, msg="API Call failed! Exception during api call", reason=str(e),
                 api_call=module.api_call)
@@ -102,7 +142,10 @@ def main():
             client_secret=dict(required=True, type='str'),
             api_name=dict(required=True, type='str'),
             method=dict(required=True, type='str', choises=['GET', 'POST']),
-            data=dict(required=False, type='dict')
+            data=dict(required=False, type='dict'),
+            validate_certs=dict(required=False, type='bool', default=False),
+            client_cert=dict(required=False, type='str', default=None), 
+            client_key=dict(required=False, type='str', default=None)
         ))
     host = module.params.get('host')
     client_id = module.params.get('client_id')
@@ -116,8 +159,10 @@ def main():
     access_token = login_cppm(module, host, client_id, client_secret)
     resp = cppm_api_call(module, host, access_token, api_name, method=method, data=data)
     if resp.code == 200 or resp.code == 201:  # Success
-        module.exit_json(changed=True, msg=resp.msg, status_code=int(resp.code), response=resp.read())
-
+        if method == "POST":
+            module.exit_json(changed=True, msg=resp.msg, status_code=int(resp.code))
+        else:
+            module.exit_json(changed=False, msg=result, status_code=int(resp.code))
     else:  # Call failed
         err = json.loads(resp.read())
         module.fail_json(changed=False, msg="API Call failed!",
