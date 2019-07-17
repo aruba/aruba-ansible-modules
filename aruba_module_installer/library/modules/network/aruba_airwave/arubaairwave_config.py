@@ -37,6 +37,16 @@ options:
             - parameters for required for some query operations in dictionary
               format.
         required: false
+    validate_certs:
+        decription:
+            - Validate server certs when this is set to True
+        required: false
+    client_cert:
+        decription: (Optional)Provide the path to client cert file for validation in server side.
+        required: false
+    client_key:
+        description: If the provided client cert does not have the key in it, use this parameter
+        required: false
 """
 EXAMPLES = """
 #Usage Examples
@@ -76,9 +86,12 @@ def login_amp(module, host, credential_0, credential_1):
     headers = { 'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded'}
     data = 'credential_0=' + credential_0 + '&credential_1=' + credential_1 + '&destination=/&login=Log In'
     cookies = cookiejar.LWPCookieJar()
+    validate_certs = module.params.get('validate_certs')
+    client_cert= module.params.get('client_cert')
+    client_key= module.params.get('client_key')
     try:
 
-        resp = open_url(url, headers=headers, method="POST", validate_certs=False, data=data, cookies=cookies)
+        resp = open_url(url, headers=headers, method="POST", validate_certs=validate_certs, data=data, cookies=cookies, client_cert=client_cert, client_key=client_key)
         if resp.code == 200:
             ## Extract Biscotti from headers
             if "X-BISCOTTI" in resp.headers:
@@ -99,7 +112,9 @@ def login_amp(module, host, credential_0, credential_1):
 def amp_api_call(module, x_biscotti, set_cookie, host, api_name, method='GET', data={}, params=None):
     url = "https://" + str(host) + "/" + str(api_name)
     cookies = cookiejar.LWPCookieJar()
-    validate_certs = False
+    validate_certs = module.params.get('validate_certs')
+    client_cert= module.params.get('client_cert')
+    client_key= module.params.get('client_key')
     http_agent = 'ansible-httpget'
     follow_redirects = 'urllib'
     try:
@@ -112,7 +127,7 @@ def amp_api_call(module, x_biscotti, set_cookie, host, api_name, method='GET', d
 
         else: # POST
             headers = {'Cookie' : 'MercuryAuthHandlerCookie_AMPAuth=' + set_cookie, 'X-BISCOTTI' : x_biscotti }
-            resp = open_url(url, headers=headers, method=method, validate_certs=validate_certs, data=data)
+            resp = open_url(url, headers=headers, method=method, validate_certs=validate_certs, data=data, client_cert=client_cert, client_key=client_key)
 
     except Exception as e:
         module.fail_json(changed=False, msg="API Call failed! Exception during api call", reason=str(e))
@@ -127,7 +142,10 @@ def main():
             api_name=dict(required=True, type='str'),
             method=dict(required=True, type='str', choises=['GET', 'POST']),
             data=dict(required=False, type='str'),
-            params=dict(required=False, type='dict')
+            params=dict(required=False, type='dict'),
+            validate_certs=dict(required=False, type='bool', default= False),
+            client_cert=dict(required=False, type='str', default= None),
+            client_key=dict(required=False, type='str', default= None)
         ))
     host = module.params.get('host')
     credential_0 = module.params.get('credential_0')

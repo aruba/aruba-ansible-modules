@@ -36,6 +36,10 @@ options:
         decription:
             - JSON encoded data for the API call
         required: true
+    validate_certs: 
+        description:
+            - Set to True. Validates the server cert.
+        required: false
 """
 EXAMPLES = """
 #Usage Examples
@@ -47,7 +51,7 @@ EXAMPLES = """
         api_name: "folder"
         api_action: "update"
         data: 'json={ "folders": [ { "parentId": "4d4b127e-a7ab-4d89-9e07-508c3b529975", "folderName": "New_Test_folder"}]}'
-
+        validate_certs: True
 """
 
 from ansible.module_utils.basic import *
@@ -66,8 +70,9 @@ def login_activate(module, credential_0, credential_1):
     headers = {'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded', 'Cookie': 'Activate-cookie.text'}
     data = {"credential_0": credential_0 ,"credential_1": credential_1 }
     cookies = cookiejar.LWPCookieJar()
+    validate_certs = module.params.get('validate_certs')
     try:
-        resp = open_url(url=url, data=urlencode(data), headers=headers, method="POST", validate_certs=False, cookies=cookies)
+        resp = open_url(url=url, data=urlencode(data), headers=headers, method="POST", validate_certs=validate_certs, cookies=cookies)
         if resp.code == 200:
             cookie_list = []
             for ck in cookies:
@@ -82,15 +87,16 @@ def login_activate(module, credential_0, credential_1):
 
 def activate_api_call(module, set_cookie, api_name, api_action, method='GET', data={}):
     resp = ""
+    validate_certs = module.params.get('validate_certs')
     url = "https://activate.arubanetworks.com/api/ext/" + str(api_name) + ".json?action=" + str(api_action)
     try:
         if method == "GET":
             headers = {'Accept': 'application/json', 'Cookie': str(set_cookie)}
-            resp = open_url(url=url, headers=headers, method=method, validate_certs=False)
+            resp = open_url(url=url, headers=headers, method=method, validate_certs=validate_certs)
         else: # method is POST
             headers = {'Accept': 'application/json', 'Content-Type': 'application/json',
                        'Cookie': str(set_cookie)}
-            resp = open_url(url=url, headers=headers, method="POST", validate_certs=False, data=data)
+            resp = open_url(url=url, headers=headers, method="POST", validate_certs=validate_certs, data=data)
 
     except Exception as e:
         module.fail_json(changed=False, msg="API Call failed! Exception during api call", reason=str(e))
@@ -104,7 +110,8 @@ def main():
             api_name=dict(required=True, type='str'),
             api_action=dict(required=True, type='str'),
             method=dict(required=True, type='str', choises=['GET', 'POST']),
-            data=dict(required=True, type='str')
+            data=dict(required=True, type='str'),
+            validate_certs=dict(required=False, type='bool', default=False)
         ))
     credential_0 = module.params.get('credential_0')
     credential_1 = module.params.get('credential_1')
