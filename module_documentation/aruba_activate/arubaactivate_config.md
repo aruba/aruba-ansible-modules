@@ -27,6 +27,10 @@ Description: "This module implements REST API based configuration(GET/POST) for 
         description: Payload data for the mentioned API endpoint
         type: dict
         required: true
+    validate_certs:
+        description: Validate the server cert if this option is set to True
+        type: bool
+        required: false
         
 ##### EXAMPLES
 ```YAML
@@ -38,4 +42,5 @@ Description: "This module implements REST API based configuration(GET/POST) for 
         api_name: "folder"
         api_action: "update"
         data: 'json={ "folders": [ { "parentId": "4d4b127e-a7ab-4d89-9e07-508c3b529975", "folderName": "New_Test_folder"}]}'
+        validate_certs: True
 ```

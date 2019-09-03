@@ -27,10 +27,6 @@ import errno
 
 COLORRED = "\033[0;31m{0}\033[00m"
 
-CX_PATHS = {'module': 'modules/network/arubaoscx',
-            'plugins_connection': 'plugins/connection/arubaoscx_rest.py'
-            }
-
 SW_PATHS = {'module': 'modules/network/arubaoss',
             'module_utils': 'module_utils/network/arubaoss',
             'plugins_action': 'plugins/action/arubaoss.py',
@@ -54,22 +50,20 @@ def define_arguments():
     """
 
     description = ('This tool installs all files/directories required by '
-                   'Ansible for Aruba-OS Switch and CX integration.\n\n'
+                   'Ansible for AOS-Switch, Airwave, Clearpass, Activate,'
+                   ' Instant, and ArubaOS Controller integration.\n\n'
                    'Requirements:'
                    '\n\t- Linux OS only'
                    '\n\t- Ansible release version 2.5 or later installed'
-                   '\n\t- Python 2.7 installed'
+                   '\n\t- Python 2.7 or 3.5+ installed'
                    )
 
     epilog = ('Directories added:'
               '\n\t- <ansible_module_path>/modules/network/arubaoss'
-              '\n\t- <ansible_module_path>/modules/network/arubaoscx'
               '\n\t- <ansible_module_path>/module_utils/network/arubaoss'
               '\n\n'
               'Files added/modified:'
               '\n\t- <ansible_module_path>/plugins/action/arubaoss.py'
-              '\n\t- <ansible_module_path>/plugins/connection/'
-              'arubaoscx_rest.py'
               '\n\t- <ansible_module_path>/config/base.yml')
 
     parser = ArgumentParser(description=description,
@@ -85,15 +79,9 @@ def define_arguments():
                         action='store_true')
 
     group = parser.add_mutually_exclusive_group(required=False)
-    group.add_argument('--cx', required=False,
-                       help=('only install files/directories required for '
-                             'ArubaOS-CX.'
-                             ),
-                       action='store_true'
-                       )
     group.add_argument('--switch', required=False,
                        help=('only install files/directories required for '
-                             'ArubaOS-Switch.'
+                             'AOS-Switch.'
                              ),
                        action='store_true')
     group.add_argument('--controller', required=False,
@@ -146,14 +134,7 @@ def find_module_path():
         re_path = re_path.groupdict()['path']
 
         # Validate Ansible version is supported
-        if '2.5' <= re_version <= '2.8.9':
-            if '2.8' <= re_version <= '2.8.9':
-                print(COLORRED.format(('*'*79)+'\n\n\nThe Ansible version 2.8 '
-                                               'is currently not'
-                                      ' supported with AOS-CX modules.\nWe are'
-                                      ' working on resolving this issue.\nFor '
-                                      'these modules to work properly please '
-                                      'use Ansible version 2.7.\n\n\n'+('*'*79)))
+        if '2.5' <= re_version <= '2.9.9':
             return re_path+'/'
         else:
             exit(COLORRED.format('There was an issue with your '
@@ -168,39 +149,9 @@ def find_module_path():
                              ' is release version 2.5 or later.'))
 
 
-def install_cx_modules():
-    """
-    Installs all files/directories required by Ansible for Aruba-OS CX
-    integration.
-
-    Directories added:
-        <ansible_module_path>/modules/network/arubaoscx
-
-    Files added/modified:
-        <ansible_module_path>/plugins/connection/arubaoscx_rest.py
-
-    :return: None
-    """
-
-    global CX_PATHS, SRC_PATH, COLORRED, ANS_PATH
-
-    # Copy each directory and file to ansible module location
-    for source, path in CX_PATHS.items():
-        # If directories or files exist already, do nothing
-        if exists(ANS_PATH+path):
-            print(COLORRED.format('{} already exists'
-                                  ' at {}...\n'.format(path, ANS_PATH+path)))
-        else:
-            print('Copying {} to {}...\n'.format(path, ANS_PATH+path))
-            if isdir(SRC_PATH+path):
-                copytree(SRC_PATH+path, ANS_PATH+path)
-            else:
-                copyfile(SRC_PATH+path, ANS_PATH+path)
-
-
 def install_sw_modules():
     """
-    Installs all files/directories required by Ansible for Aruba-OS Switch
+    Installs all files/directories required by Ansible for AOS-Switch
     integration. Modifies base.yml to include 'arubaoss' modules in
     'NETWORK_GROUP_MODULES'.
 
@@ -308,7 +259,7 @@ def install_wlan_modules(install_package=None):
 
 def remove_modules():
     """
-    Removes all files/directories installed by this script for Aruba-OS Switch
+    Removes all files/directories installed by this script for
     module integration in Ansible. Modifies base.yml to remove 'arubaoss'
     'NETWORK_GROUP_MODULES'.
 
@@ -323,9 +274,9 @@ def remove_modules():
     :return: None
     """
 
-    global CX_PATHS, SW_PATHS, SRC_PATH, COLORRED, ANS_PATH
+    global SW_PATHS, SRC_PATH, COLORRED, ANS_PATH
     path_list = [CONTROLLER_PATHS, AIRWAVE_PATHS, CLEARPASS_PATHS,
-                 ACTIVATE_PATHS, INSTANT_PATHS] + [CX_PATHS, SW_PATHS]
+                 ACTIVATE_PATHS, INSTANT_PATHS] + [SW_PATHS]
 
     base_yml = ANS_PATH+'config/base.yml'
 
@@ -392,11 +343,8 @@ if __name__ == "__main__":
             remove_modules()
         elif args.reinstall:
             remove_modules()
-            install_cx_modules()
             install_sw_modules()
             install_wlan_modules()
-        elif args.cx:
-            install_cx_modules()
         elif args.switch:
             install_sw_modules()
         elif args.controller:
@@ -410,11 +358,8 @@ if __name__ == "__main__":
         elif args.instant:
             install_wlan_modules(install_package=INSTANT_PATHS)
         else:
-            install_cx_modules()
             install_sw_modules()
             install_wlan_modules()
-        # Prints warning message in case of Ansible 2.8 version
-        find_module_path()
 
     except (OSError, IOError) as e:
         if (e[0] == errno.EACCES):
