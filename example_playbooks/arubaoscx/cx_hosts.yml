@@ -1,7 +1,0 @@
-all:
-  hosts:
-    switch1:
-      ansible_host: [your_ip]
-      ansible_user: [your_user]
-      ansible_password: [your_pw]
-      ansible_connection: arubaoscx_rest  # Do not change

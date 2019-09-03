@@ -1,15 +1,16 @@
 # aruba-ansible-modules
-All Ansible modules, module installer, and example playbooks for Aruba Switching and WLAN products.
+All Ansible modules, module installer, and example playbooks for AOS-Switch and WLAN products.
+ For AOS-CX modules please see our AOS-CX Ansible Role in [Ansible's Galaxy](https://galaxy.ansible.com/arubanetworks/aoscx).
 
 ## Structure
 
-* Aruba Switching and WLAN Ansible modules and files are stored in [aruba_module_installer/library](https://github.com/aruba/aruba-ansible-modules/tree/master/aruba_module_installer/library).
+* AOS-Switch and WLAN Ansible modules and files are stored in [aruba_module_installer/library](https://github.com/aruba/aruba-ansible-modules/tree/master/aruba_module_installer/library).
 * Documentation of Switching and WLAN Ansible modules are located in [module_documentation/](https://github.com/aruba/aruba-ansible-modules/tree/master/module_documentation) 
 * Frequently Asked Questions are located in [FAQ.md](https://github.com/aruba/aruba-ansible-modules/blob/master/FAQ.md)
-* Aruba Switching and WLAN Ansible playbook examples are stored in [example_playbooks/](https://github.com/aruba/aruba-ansible-modules/tree/master/example_playbooks)
+* AOS-Switch and WLAN Ansible playbook examples are stored in [example_playbooks/](https://github.com/aruba/aruba-ansible-modules/tree/master/example_playbooks)
 
 # How to Install Modules
-The aruba_module_installer.py tool installs all files/directories required by Ansible for Aruba Switching and WLAN integration.
+The aruba_module_installer.py tool installs all files/directories required by Ansible for AOS-Switch and WLAN integration.
 
 ## Requirements
 
@@ -40,28 +41,14 @@ optional arguments:
   -r, --remove  remove all files & directories installed by this script.
   --reinstall   remove all files & directories installed by this script. Then
                 re-install.
-  --cx          only install files/directories required for ArubaOS-CX.
-  --switch      only install files/directories required for ArubaOS-Switch.
+  --switch      only install files/directories required for AOS-Switch.
 ```
 
-# How to Run a Playbook on ArubaOS-Switch or ArubaOS-CX Device
-Below you'll find step by step instructions on how to run an example playbook on your ArubaOS-Switch or CX device.
+# How to Run a Playbook on AOS-Switch
+
 ## Prerequisites
-Follow the above steps to install the ArubaOS-CX and ArubaOS-Switch Ansible modules.
-
-### ArubaOS-CX
-1. Assign an IP address to the management interface of your CX device. Ensure that the IP address is reachable
-from your Ansible control machine.
-2. Enable REST on your CX device with the following commands:
-    ```
-    switch(config)# https-server rest access-mode read-write
-    switch(config)# https-server vrf mgmt
-    ```
-3. Modify the IP address in the hosts file example_playbooks/arubaoscx/cx_hosts.yml to match the IP of your CX device.
-4. Modify the ansible_user and ansible_password in the hosts file example_playbooks/arubaoscx/cx_hosts.yml to match the login information of your CX device.
-
-    
-### ArubaOS-Switch
+Follow the above steps to install the AOS-Switch Ansible modules.
+   
 1. Assign an IP address to the management interface of your Switch device. Ensure that the IP address is reachable
 from your Ansible control machine.
 2. Enable REST on your Switch device with the following commands:
@@ -74,7 +61,7 @@ from your Ansible control machine.
 
 
 ### Executing a Playbook
-To execute a playbook run the following command from the Linux machine, replace playbook_file with the desired playbook and either cx_hosts.yml or switch_hosts.yml:  
+To execute a playbook run the following command from the Linux machine, replace playbook_file with the desired playbook:  
 ```bash
-$ ansible-playbook [playbook_file] -i [cx_hosts.yml|switch_hosts.yml]
+$ ansible-playbook [playbook_file] -i switch_hosts.yml
 ```
