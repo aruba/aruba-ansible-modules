@@ -6,38 +6,38 @@ version_added: 0.1
 short_description: Call Mobility Master API
 options:
     host:
-        decription:
+        description:
             - Hostname or IP Address of the Mobility Master.
         required: true
     client_id:
-        decription:
+        description:
             - Username used to login to the Mobility Master
         required: true
     client_secret:
-        decription:
+        description:
             - Password used to login to the Mobility Master
         required: true
     api_name:
-        decription:
+        description:
             - Name of the API to call
         required: true
     method:
-        decription:
+        description:
             - HTTP Method to be used for the API call
         required: true
         choises:
             - GET
             - POST
     data:
-        decription:
+        description:
             - JSON encoded data for the API call
         required: false
     validate_certs:
-        decription:
+        description:
             - Validate server certs when this is set to True
         required: false
     client_cert:
-        decription: (Optional)Provide the path to client cert file for validation in server side.
+        description: (Optional)Provide the path to client cert file for validation in server side.
         required: false 
     client_key:
         description: If the provided client cert does not have the key in it, use this parameter

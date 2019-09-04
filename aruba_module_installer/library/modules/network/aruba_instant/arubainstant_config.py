@@ -11,19 +11,19 @@ version_added: 0.1
 short_description: Configures and monitors IAP in either master, slave or standalone mode using APIs
 options:
     host:
-        decription:
+        description:
             - Hostname or IP Address of the Virtual Controller.
         required: false
     username:
-        decription:
+        description:
             - Username used to login to the Virtual Controller/Master IAP
         required: false
     password:
-        decription:
+        description:
             - Password used to login to the Virtual Controller/Master IAP
         required: false
     method:
-        decription:
+        description:
             - HTTP Method to be used for the API call
         required: true
         choices:
@@ -42,15 +42,15 @@ options:
             - configuration
             - monitoring
     api_name:
-        decription:
+        description:
             - IAP Rest API Object Name
         required: true
     config_path:
-        decription:
+        description:
             - Path in configuration hierarchy to the node the API call is applied to
         required: false
     data:
-        decription:
+        description:
             - dictionary data for the API call
         required: false
 """
