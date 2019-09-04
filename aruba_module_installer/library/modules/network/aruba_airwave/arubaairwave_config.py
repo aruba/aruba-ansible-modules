@@ -6,19 +6,19 @@ version_added: 0.1
 short_description: Configure Aruba Airwave using APIs.
 options:
     host:
-        decription:
+        description:
             - Hostname or IP Address of the Aruba Airwave
         required: true
     credential_0:
-        decription:
+        description:
             - Username used to login to the Aruba Airwave
         required: true
     credential_1:
-        decription:
+        description:
             - Password used to login to the Aruba Airwave
         required: true
     method:
-        decription:
+        description:
             - HTTP Method to be used for the API call
         required: true
         choises:
@@ -29,7 +29,7 @@ options:
             - API endpoint for which the request is made
         required: True
     data:
-        decription:
+        description:
             - JSON encoded data for the API call
         required: false
     params:
@@ -38,11 +38,11 @@ options:
               format.
         required: false
     validate_certs:
-        decription:
+        description:
             - Validate server certs when this is set to True
         required: false
     client_cert:
-        decription: (Optional)Provide the path to client cert file for validation in server side.
+        description: (Optional)Provide the path to client cert file for validation in server side.
         required: false
     client_key:
         description: If the provided client cert does not have the key in it, use this parameter
