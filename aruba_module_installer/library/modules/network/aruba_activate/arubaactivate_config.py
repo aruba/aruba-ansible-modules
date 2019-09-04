@@ -6,34 +6,34 @@ version_added: 0.1
 short_description: Configure Aruba Activate using APIs.
 options:
     host:
-        description:
+        decription:
             - Hostname or IP Address of the Aruba Activate
         required: true
     credential_0:
-        description:
+        decription:
             - Username used to login to the Aruba Activate
         required: true
     credential_1:
-        description:
+        decription:
             - Password used to login to the Aruba Activate
         required: true
     method:
-        description:
+        decription:
             - HTTP Method to be used for the API call
         required: true
         choises:
             - GET
             - POST
     api_name:
-        description:
+        decription:
             - ARUBA Activate Rest API Object Name
         required: true
     api_action:
-        description:
+        decription:
             - ARUBA Activate action. (update/query)
         required: true
     data:
-        description:
+        decription:
             - JSON encoded data for the API call
         required: true
     validate_certs: 
