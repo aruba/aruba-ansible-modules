@@ -37,6 +37,13 @@ from ansible.module_utils.urls import fetch_url
 from time import sleep
 import json
 
+try:
+    from __main__ import display
+except ImportError:
+    from ansible.utils.display import Display
+    display = Display()
+
+
 _DEVICE_CONNECTION = None
 
 arubaoss_provider_spec = {
@@ -80,32 +87,97 @@ def check_args(module, warnings):
     pass
 
 
-def get_version(module):
-    host = module.params['host']
-    port = module.params['port']
-    if module.params['use_ssl']:
-        proto = 'https'
-        port = port or 443
-    else:
-        proto = 'http'
-        port = port or 80
-    check_url = "{}://{}:{}/rest".format(proto,host,port)
-    uri = '/version'
-    headers = {'Content-Type': 'application/json'}
-    method = 'GET'
-    body = ""
-    url= check_url+uri
-    response, headers = fetch_url( module,
-        url, data=body, headers=headers,
-        method=method, use_proxy=False
-    )
-    if headers['status'] == 200:
-        body = response.read()
-        body=json.loads(body)
-        api=body['version_element'][len(body['version_element'])-1]['version']
-        module.params['api_version'] = api
-    else:
-        module.fail_json(**headers)
+class Checkversion:
+    '''
+    Here we set default REST API version as v6.0 to login &
+    retrieve REST version supported in switch.
+    '''
+
+    def __init__(self, module):
+        self._module = module
+        self._cookie = None
+
+        host = self._module.params['host']
+        port = self._module.params['port']
+
+        if self._module.params['use_ssl']:
+            proto = 'https'
+            port = port or 443
+        else:
+            proto = 'http'
+            port = port or 80
+
+        #REST API version is hardcoded to v6.0 to login & get REST Version
+        #Ansible supported from 16.08 which has REST v6.0
+        #If any changes done with REST API supported in switch side
+        #needs to be updated here.
+        api = 'v6.0'
+
+        self._url = "{}://{}:{}/rest/{}".format(proto,host,port,api)
+
+    def _send(self, url, method='POST', body={}):
+        '''Sends command to device '''
+
+        headers = {'Content-Type': 'application/json'}
+        data = self._module.jsonify(body)
+
+        if self._cookie:
+            headers['Cookie'] = self._cookie
+
+        response, headers = fetch_url(
+            self._module, url, data=body, headers=headers,
+            method=method, use_proxy=False)
+
+        return response, headers
+
+
+    def login(self):
+        ''' Created login uri and saves cookie'''
+
+        password = self._module.params['password']
+        username = self._module.params['username']
+
+        url = self._url + "/login-sessions"
+        data = {"userName":username ,"password": password}
+        data = self._module.jsonify(data)
+
+        response, headers = self._send(url, body=data)
+
+        if headers['status'] == 201:
+            self._cookie = headers.get('set-cookie')
+        elif headers['status'] == 404:
+            self._module.fail_json(msg='AOS-Switch Ansible support needs minimum Firmware version of 16.08.xx', data='')
+        else:
+            self._module.fail_json(**headers)
+
+    def logout(self):
+        ''' Logout from device '''
+        url = self._url + "/login-sessions"
+
+        response, headers = self._send(url, body="", method='DELETE')
+        self._cookie = None
+
+        if headers['status'] != 204:
+            self._module.fail_json(**headers)
+
+    def get_version(self):
+        ''' GET Version from device '''
+
+        self.login()
+
+        url = self._url[:-5] + "/version"
+        response, headers = self._send(url, body="", method='GET')
+
+        if headers['status'] == 200:
+            body = response.read()
+            body=json.loads(body)
+            api=body['version_element'][len(body['version_element'])-1]['version']
+            self._module.params['api_version'] = api
+        else:
+            self._module.fail_json(**headers)
+
+        self.logout()
+
 
 def load_params(module):
     provider = module.params.get('provider') or dict()
@@ -113,8 +185,8 @@ def load_params(module):
         if key in arubaoss_argument_spec:
             if module.params.get(key) is None and value is not None:
                 module.params[key] = value
-    if module.params['api_version'] is 'None':
-        get_version(module)
+    check = Checkversion(module)
+    return check.get_version()
 
 
 def get_connection(module):
@@ -294,8 +366,6 @@ class Aossapi:
                     data['changed'] = False
                     data['failed'] = False
                     return data
-
-
         return None
 
 def get_config(module, *args, **kwargs):
