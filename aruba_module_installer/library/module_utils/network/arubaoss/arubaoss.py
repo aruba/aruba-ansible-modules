@@ -108,7 +108,7 @@ class Checkversion:
             port = port or 80
 
         #REST API version is hardcoded to v6.0 to login & get REST Version
-        #Ansible supported from Yakima which has REST v6.0
+        #Ansible supported from 16.08 which has REST v6.0
         #If any changes done with REST API supported in switch side
         #needs to be updated here.
         api = 'v6.0'
@@ -146,7 +146,7 @@ class Checkversion:
         if headers['status'] == 201:
             self._cookie = headers.get('set-cookie')
         elif headers['status'] == 404:
-            self._module.fail_json(msg='Arubaoss Ansible support needs minimum Firmware version of 16.08.xx', data='')
+            self._module.fail_json(msg='AOS-Switch Ansible support needs minimum Firmware version of 16.08.xx', data='')
         else:
             self._module.fail_json(**headers)
 
