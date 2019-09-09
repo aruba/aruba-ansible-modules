@@ -11,38 +11,38 @@ version_added: 0.1
 short_description: Configure ArubaOS products like Mobility Master and Mobility Controllers using AOS APIs
 options:
     host:
-        decription:
+        description:
             - Hostname or IP Address of the Mobility Master.
         required: false
     username:
-        decription:
+        description:
             - Username used to login to the Mobility Master
         required: false
     password:
-        decription:
+        description:
             - Password used to login to the Mobility Master
         required: false
     method:
-        decription:
+        description:
             - HTTP Method to be used for the API call
         required: true
         choices:
             - GET
             - POST
     api_name:
-        decription:
+        description:
             - ARUBA MM Rest API Object Name
         required: true
     config_path:
-        decription:
+        description:
             - Path in configuration hierarchy to the node the API call is applied to
         required: false
     data:
-        decription:
+        description:
             - dictionary data for the API call
         required: false
     validate_certs:
-        decription:
+        description:
             - (Optional) set to True to validate server SSL certificate upon HTTPS connection. Default option is false
         required: false
     client_cert:
