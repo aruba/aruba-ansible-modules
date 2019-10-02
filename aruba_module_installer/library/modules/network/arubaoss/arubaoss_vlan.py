@@ -162,19 +162,19 @@ def config_vlan_ipaddress(module):
     # Parameters
     if params['vlan_id'] == "":
         return {'msg': "vlan_id cannot be null",
-                'changed': False, 'failed': False}
+                'changed': False, 'failed': True}
     else:
         data = {'vlan_id': params['vlan_id']}
 
     if params['version'] == "" or params['vlan_ip_address'] == "":
         return {'msg': "IP Address or version cannot be null",
-                'changed': False, 'failed': False}
+                'changed': False, 'failed': True}
     else:
         data['ip_address'] = {'version': params['version'], 'octets': params['vlan_ip_address']}
 
     if params['version'] == "" or params['vlan_ip_mask'] == "":
         return {'msg': "Subnet mask or version cannot be null",
-                'changed': False, 'failed': False}
+                'changed': False, 'failed': True}
     else:
         data['ip_mask'] = {'version': params['version'], 'octets': params['vlan_ip_mask']}
 
@@ -182,15 +182,15 @@ def config_vlan_ipaddress(module):
 
     # URLs
     url = "/vlans/" + str(params['vlan_id']) + "/ipaddresses"
-    check_url = url + params['ip_address_mode'] + "-" +  params['vlan_ip_address']
+    check_url = url + params['ip_address_mode'] + "-" + params['vlan_ip_address']
 
     # Check if the passed vlan is configured
     check_presence_vlan = get_config(module, url)
     if not check_presence_vlan:
         return {'msg': 'Cannot configure IP Address without Vlan configured',
-                'changed': False, 'failed': False}
+                'changed': False, 'failed': True}
     else:
-        if params ['config'] == "create":
+        if params['config'] == "create":
             check_presence = get_config(module, url)
             newdata = json.loads(check_presence)
 
@@ -208,13 +208,21 @@ def config_vlan_ipaddress(module):
             method = 'POST'
             result = run_commands(module, url, data, method)
 
-        elif params ['config'] == "delete":
+        elif params['config'] == "delete":
+            check_dhcp_url = "/vlans/" + str(params['vlan_id'])
+            check_dhcp_enabled = get_config(module, check_dhcp_url)
+            check_dhcp_enabled = json.loads(check_dhcp_enabled)
+            if "is_dhcp_server_enabled" in check_dhcp_enabled.keys():
+                if check_dhcp_enabled["is_dhcp_server_enabled"]:
+                    return {'msg': 'DHCP server must be disabled on this '
+                                   'VLAN {}'.format(params['vlan_id']),
+                            'changed': False, 'failed': True}
             method = 'DELETE'
-            result = run_commands(module, check_url, data, method, check=check_url)
+            result = run_commands(module, url, data, method)
 
         else:
             return {'msg': 'Valid config options are : create and delete',
-                'changed': False, 'failed': False}
+                'changed': False, 'failed': True}
 
     return result
 
@@ -236,13 +244,13 @@ def config_vlan_port(module):
     # Parameters
     if params['vlan_id'] == "":
         return {'msg': "vlan_id cannot be null",
-                'changed': False, 'failed': False}
+                'changed': False, 'failed': True}
     else:
         data = {'vlan_id': params['vlan_id']}
 
     if params['port_id'] == "":
         return {'msg': "port_id cannot be null",
-                'changed': False, 'failed': False}
+                'changed': False, 'failed': True}
     else:
         data['port_id'] = params['port_id']
 
@@ -254,7 +262,7 @@ def config_vlan_port(module):
     check_presence = get_config(module, "/vlans/"+ str(params['vlan_id']))
     if not check_presence:
         return {'msg': 'Cannot configure ports without Vlan configured',
-                'changed': False, 'failed': False}
+                'changed': False, 'failed': True}
     else:
         if params['config'] == "create":
             check_presence = get_config(module, del_url)
@@ -269,7 +277,7 @@ def config_vlan_port(module):
             method = 'DELETE'
         else:
             return {'msg': 'Valid config options are : create and delete',
-                'changed': False, 'failed': False}
+                'changed': False, 'failed': True}
 
         result = run_commands(module, url, data, method, check=del_url)
         return result
@@ -294,13 +302,13 @@ def config_vlan_dhcpHelperAddress(module):
     # Parameters
     if params['vlan_id'] == "":
         return {'msg': "vlan_id cannot be null",
-                'changed': False, 'failed': False}
+                'changed': False, 'failed': True}
     else:
         data = {'vlan_id': params['vlan_id']}
 
     if params['helper_addresses'] == "":
         return {'msg': "DHCP Helper IP Addr cannot be null",
-                'changed': False, 'failed': False}
+                'changed': False, 'failed': True}
     else:
         data['dhcp_helper_address'] = {'version': params['version'], 'octets': params['helper_addresses']}
 
@@ -311,7 +319,7 @@ def config_vlan_dhcpHelperAddress(module):
     check_presence = get_config(module, "/vlans/"+ str(params['vlan_id']))
     if not check_presence:
         return {'msg': 'Cannot configure Helper Address without Vlan configured',
-                'changed': False, 'failed': False}
+                'changed': False, 'failed': True}
 
     else:
         if params ['config'] == "create":
@@ -342,34 +350,44 @@ def config_vlan(module):
     # Parameters
     if params['vlan_id'] == "":
         return {'msg': "vlan_id cannot be null",
-                'changed': False, 'failed': False}
+                'changed': False, 'failed': True}
     else:
         data = {'vlan_id': params['vlan_id']}
 
     if params['name'] == "":
-        return {'msg': "vlan name cannot be null",
-                'changed': False, 'failed': False}
+        data['name'] = "VLAN{}".format(params['vlan_id'])
     else:
-       data['name'] = params['name']
+        data['name'] = params['name']
 
     data['status'] = params['status']
     data['type'] = params['vlantype']
     data['is_jumbo_enabled'] = params['is_jumbo_enabled']
     data['is_voice_enabled'] = params['is_voice_enabled']
     data['is_dsnoop_enabled'] = params['is_dsnoop_enabled']
-    #data['is_dhcp_server_enabled'] = params['is_dhcp_server_enabled']
-    data['is_management_vlan'] = params['is_management_vlan']
+
+    firmware_url = "/system/status"
+    check_firmware_version = get_config(module, firmware_url)
+    dhcp_server = module.from_json(to_text(check_firmware_version))
+    if (dhcp_server['firmware_version'][:2] == "YA") or (dhcp_server['firmware_version'][:2] == "YB"):
+        if params['is_dhcp_server_enabled']:
+            return {'msg': "option : is_dhcp_server_enabled is not supported on this platform",
+                    'changed': False, 'failed': True}
+    else:
+        data['is_dhcp_server_enabled'] = params['is_dhcp_server_enabled']
 
     config_url = "/vlans/" + str(params['vlan_id'])
-
-    if params ['config'] == "create":
-        check_presence = get_config(module, "/vlans/params['vlan_id']")
+    if params['config'] == "create":
+        check_presence = get_config(module, config_url)
         if not check_presence:
+            data['is_management_vlan'] = params['is_management_vlan']
             url = "/vlans"
             method = 'POST'
         else:
             url = "/vlans/" + str(params['vlan_id'])
             method = 'PUT'
+            management_vlan = module.from_json(to_text(check_presence))
+            if params['is_management_vlan'] != management_vlan['is_management_vlan']:
+                data['is_management_vlan'] = params['is_management_vlan']
     else:
         url = config_url
         method = 'DELETE'
@@ -441,8 +459,9 @@ def config_acl(module):
         return {'msg': 'Configure ACL first. {} does not exist'.\
                                 format(params['acl_id']),'changed':False}
 
-    delete_url = url + '/' + str(params['vlan_id']) + '-' + params['acl_id'] + "~" + acl_type\
-            + '-' +  direction
+    delete_url = "{}/{}-{}~{}-{}".format(url, params['vlan_id'],
+                                         params['acl_id'], acl_type,
+                                         direction)
 
     config_present = False
     current_acl = get_config(module,url)
@@ -452,7 +471,6 @@ def config_acl(module):
         for ele in check_config['acl_vlan_policy_element']:
             if ele['uri'] == delete_url:
                 config_present = ele
-
 
     if params['config'] == 'create':
         if config_present:
@@ -499,7 +517,7 @@ def run_module():
         is_jumbo_enabled=dict(type='bool', required=False, default=False),
         is_voice_enabled=dict(type='bool', required=False, default=False),
         is_dsnoop_enabled=dict(type='bool', required=False, default=False),
-        is_dhcp_server_enabled=dict(type='bool', required=False, default=None),
+        is_dhcp_server_enabled=dict(type='bool', required=False, default=False),
         is_management_vlan=dict(type='bool', required=False, default=False),
         vlan_ip_address=dict(type='str', required=False, default=""),
         vlan_ip_mask=dict(type='str', required=False, default=""),
