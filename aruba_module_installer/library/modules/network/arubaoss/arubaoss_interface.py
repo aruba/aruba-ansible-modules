@@ -40,7 +40,8 @@ options:
         required: true
     description:
         description:
-            - interface name/description
+            - interface name/description, to remove the description of an interface
+            pass in an empty string ''
         required: false
     admin_stat:
         description:

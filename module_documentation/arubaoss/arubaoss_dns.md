@@ -8,7 +8,19 @@ Description: "This implements rest apis which can be used to configure DNS"
         choices: DCM_DHCP, DCM_MANUAL, DCM_DISABLED
         required: False
     dns_domain_names:
-        description: Array of manually configured DNS server domain names
+        description: The first  manually configured DNS server domain name
+        required: False
+    dns_domain_names_2:
+        description: The second  manually configured DNS server domain name
+        required: False
+    dns_domain_names_3:
+        description: The third  manually configured DNS server domain name
+        required: False
+    dns_domain_names_4:
+        description: The fourth  manually configured DNS server domain name
+        required: False
+    dns_domain_names_5:
+        description: The fifth  manually configured DNS server domain name
         required: False
     server_1:
         description: The first manually configured DNS Server.
