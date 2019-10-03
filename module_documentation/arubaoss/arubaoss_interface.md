@@ -9,8 +9,8 @@ Description: "Implements Ansible module for port configuration and management."
         required: true
     description:
         description:
-            - interface name/description
-        required: false
+            - interface name/description, to remove the description of an interface
+            pass in an empty string ''
     admin_stat:
         description:
             - interface admin status
