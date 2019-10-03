@@ -74,20 +74,22 @@ author:
 '''
 
 EXAMPLES = '''
-- name: Updates the given console DNS Server configuration to the system
-       arubaoss_dns:
-         dns_config_mode: "DCM_MANUAL"
-         dns_domain_names: ["mydomain.com",
-                             "myotherdomain.com"]
-         version_1: "IAV_IP_V4"
-         server_1: "10.2.3.4"
-         version_2: "IAV_IP_V4"
-         server_2: "10.2.3.5"
-         version_3: "IAV_IP_V4"
-         server_3: "10.2.3.6"
-         version_4: "IAV_IP_V4"
-         server_4: "10.2.3.7"
-
+    - name: Configure DNS
+      arubaoss_dns:
+        dns_config_mode: "DCM_MANUAL"
+        dns_domain_names: "mydomain.com"
+        dns_domain_names_2: "myotherdomain.com"
+        dns_domain_names_3: myotherotherdomain.com
+        dns_domain_names_4: yourdomain.com
+        dns_domain_names_5: otherdomain.com
+        version_1: "IAV_IP_V4"
+        server_1: "10.2.3.4"
+        version_2: "IAV_IP_V4"
+        server_2: "10.2.3.5"
+        version_3: "IAV_IP_V4"
+        server_3: "10.2.3.6"
+        version_4: "IAV_IP_V4"
+        server_4: "10.2.3.7"
 '''
 
 
@@ -116,14 +118,14 @@ def config(module):
     data = {'dns_config_mode': params['dns_config_mode']}
 
     # Configure the domain names
-    for dns in {params['dns_domain_names'], params['dns_domain_names_2'],
-          params['dns_domain_names_3'], params['dns_domain_names_4'], params['dns_domain_names_5']}:
+    for dns in [params['dns_domain_names'], params['dns_domain_names_2'],
+          params['dns_domain_names_3'], params['dns_domain_names_4'], params['dns_domain_names_5']]:
         if not dns == "" and dns not in dnsList:
             dnsList.append(dns)
     data['dns_domain_names'] = dnsList
 
     # Configure the dns servers
-    for dnsServer in {params['server_1'], params['server_2'], params['server_3'], params['server_4']}:
+    for dnsServer in [params['server_1'], params['server_2'], params['server_3'], params['server_4']]:
         if not dnsServer == "" and dnsServer not in dnsServerList:
             dnsServerList.append(dnsServer)
             server = 'server_' + str(idval)
