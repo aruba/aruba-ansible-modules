@@ -123,7 +123,7 @@ def config(module):
     data['dns_domain_names'] = dnsList
 
     # Configure the dns servers
-    for dnsServer in {params['server_1'], params['server_2'], params['server_3'], params['server_4']}:
+    for dnsServer in [params['server_1'], params['server_2'], params['server_3'], params['server_4']]:
         if not dnsServer == "" and dnsServer not in dnsServerList:
             dnsServerList.append(dnsServer)
             server = 'server_' + str(idval)
