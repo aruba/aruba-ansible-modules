@@ -1,6 +1,6 @@
 # aruba-ansible-modules
 All Ansible modules, module installer, and example playbooks for AOS-Switch and WLAN products.
- For AOS-CX modules please see our AOS-CX Ansible Role in [Ansible's Galaxy](https://galaxy.ansible.com/arubanetworks/aoscx).
+ For AOS-CX modules please see our AOS-CX Ansible Role in [Ansible's Galaxy](https://galaxy.ansible.com/arubanetworks/aoscx_role).
 
 ## Structure
 
