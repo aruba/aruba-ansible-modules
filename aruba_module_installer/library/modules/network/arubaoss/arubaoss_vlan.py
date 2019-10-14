@@ -166,23 +166,23 @@ def config_vlan_ipaddress(module):
     else:
         data = {'vlan_id': params['vlan_id']}
 
-    if params['version'] == "" or params['vlan_ip_address'] == "":
-        return {'msg': "IP Address or version cannot be null",
-                'changed': False, 'failed': True}
-    else:
-        data['ip_address'] = {'version': params['version'], 'octets': params['vlan_ip_address']}
+    if params['ip_address_mode'] == "IAAM_STATIC" and params['config'] == "create":
+        if params['version'] == "" or params['vlan_ip_address'] == "":
+            return {'msg': "IP Address or version cannot be null",
+                    'changed': False, 'failed': True}
+        else:
+            data['ip_address'] = {'version': params['version'], 'octets': params['vlan_ip_address']}
 
-    if params['version'] == "" or params['vlan_ip_mask'] == "":
-        return {'msg': "Subnet mask or version cannot be null",
-                'changed': False, 'failed': True}
-    else:
-        data['ip_mask'] = {'version': params['version'], 'octets': params['vlan_ip_mask']}
+        if params['version'] == "" or params['vlan_ip_mask'] == "":
+            return {'msg': "Subnet mask or version cannot be null",
+                    'changed': False, 'failed': True}
+        else:
+            data['ip_mask'] = {'version': params['version'], 'octets': params['vlan_ip_mask']}
 
     data['ip_address_mode'] = params['ip_address_mode']
 
     # URLs
     url = "/vlans/" + str(params['vlan_id']) + "/ipaddresses"
-    check_url = url + params['ip_address_mode'] + "-" + params['vlan_ip_address']
 
     # Check if the passed vlan is configured
     check_presence_vlan = get_config(module, url)
@@ -195,14 +195,15 @@ def config_vlan_ipaddress(module):
             newdata = json.loads(check_presence)
 
             # Check if IP already configured
-            if newdata['collection_result']['total_elements_count'] == 1:
-                if newdata['ip_address_subnet_element'][0]['ip_address']['octets'] == params['vlan_ip_address']:
-                    return {'msg': 'The ip address is already present on switch',
-                      'changed': False, 'failed': False}
+            if params['ip_address_mode'] == "IAAM_STATIC":
+                if newdata['collection_result']['total_elements_count'] == 1:
+                    if newdata['ip_address_subnet_element'][0]['ip_address']['octets'] == params['vlan_ip_address']:
+                        return {'msg': 'The ip address is already present on switch',
+                          'changed': False, 'failed': False}
 
-                else:
-                    method = 'DELETE'
-                    result = run_commands(module, url, data, method)
+                    else:
+                        method = 'DELETE'
+                        result = run_commands(module, url, data, method)
 
             # Create the ip address on vlan
             method = 'POST'
@@ -431,7 +432,7 @@ def config_qos(module):
         result = run_commands(module, url,data, 'POST')
 
     else:
-        url =  url + '/' + str(params['vlan_id']) + '-' + params['qos_policy'] + '~' + 'QPT_QOS'
+        url = url + '/' + str(params['vlan_id']) + '-' + params['qos_policy'] + '~' + 'QPT_QOS'
         check_url = url + '/stats'
 
         result = run_commands(module, url, {}, 'DELETE', check=check_url)
