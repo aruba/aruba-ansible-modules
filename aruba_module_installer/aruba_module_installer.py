@@ -32,10 +32,16 @@ SW_PATHS = {'module': 'modules/network/arubaoss',
             'plugins_action': 'plugins/action/arubaoss.py',
             }
 CONTROLLER_PATHS = {'module': 'modules/network/arubaos_controller'}
+CONTROLLER_SSH_PATHS = {'module': 'modules/network/aruba',
+                       'plugins_cliconf': 'plugins/cliconf/aruba.py',
+                       'plugins_terminal': 'plugins/terminal/aruba.py',
+                       'plugins_action': 'plugins/action/aruba.py'
+                      }
 AIRWAVE_PATHS = {'module': 'modules/network/aruba_airwave'}
 CLEARPASS_PATHS = {'module': 'modules/network/aruba_clearpass'}
 ACTIVATE_PATHS = {'module': 'modules/network/aruba_activate'}
 INSTANT_PATHS = {'module': 'modules/network/aruba_instant'}
+
 
 CMD = 'ansible --version'
 
@@ -61,10 +67,21 @@ def define_arguments():
     epilog = ('Directories added:'
               '\n\t- <ansible_module_path>/modules/network/arubaoss'
               '\n\t- <ansible_module_path>/module_utils/network/arubaoss'
+              '\n\t- <ansible_module_path>/modules/network/arubaos_controller'
+              '\n\t- <ansible_module_path>/modules/network/aruba_airwave'
+              '\n\t- <ansible_module_path>/modules/network/aruba_clearpass'
+              '\n\t- <ansible_module_path>/modules/network/aruba_activate'
+              '\n\t- <ansible_module_path>/modules/network/aruba_instant'
               '\n\n'
               'Files added/modified:'
               '\n\t- <ansible_module_path>/plugins/action/arubaoss.py'
-              '\n\t- <ansible_module_path>/config/base.yml')
+              '\n\t- <ansible_module_path>/config/base.yml'
+              '\n\t- <ansible_module_path>/plugins/terminal/aruba.py'
+              '\n\t- <ansible_module_path>/plugins/cliconf/aruba.py'
+              '\n\t- <ansible_module_path>/plugins/action/aruba.py'
+              '\n\t- <ansible_module_path>/modules/network/aruba/aruba_command.py'
+              '\n\t- <ansible_module_path>/modules/network/aruba/aruba_config.py'
+             )
 
     parser = ArgumentParser(description=description,
                             formatter_class=RawDescriptionHelpFormatter,
@@ -226,8 +243,19 @@ def install_wlan_modules(install_package=None):
     Installs files/directories required by Ansible for Aruba Wlan integration.
     Provide the argument to install a specific package during script execution.
 
-    Directories added to the path:
-        <ansible_module_path>/modules/network/
+    Directories added/modified to the path:
+        <ansible_module_path>/modules/network/aruba_airwave
+        <ansible_module_path>/modules/network/aruba_clearpass
+        <ansible_module_path>/modules/network/aruba_activate
+        <ansible_module_path>/modules/network/arubaos_controller
+        <ansible_module_path>/modules/network/aruba_instant
+
+    Files added/modified:
+        <ansible_module_path>/modules/network/aruba/aruba_command.py
+        <ansible_module_path>/modules/network/aruba/aruba_config.py
+        <ansible_module_path>/plugins/terminal/aruba.py
+        <ansible_module_path>/plugins/cliconf/aruba.py
+        <ansible_module_path>/plugins/action/aruba.py
 
     :return: None
     """
@@ -235,7 +263,7 @@ def install_wlan_modules(install_package=None):
     global ANS_PATH
 
     path_list = [CONTROLLER_PATHS, AIRWAVE_PATHS, CLEARPASS_PATHS,
-                 ACTIVATE_PATHS, INSTANT_PATHS]
+                 ACTIVATE_PATHS, INSTANT_PATHS, CONTROLLER_SSH_PATHS]
 
     #If an argument is specified, install only that package.
     #Otherwise installs all the packages
@@ -266,17 +294,27 @@ def remove_modules():
     Directories removed:
         <ansible_module_path>/modules/network/arubaoss
         <ansible_module_path>/module_utils/network/arubaoss
+        <ansible_module_path>/modules/network/aruba_airwave
+        <ansible_module_path>/modules/network/aruba_clearpass
+        <ansible_module_path>/modules/network/aruba_activate
+        <ansible_module_path>/modules/network/arubaos_controller
+        <ansible_module_path>/modules/network/aruba_instant
 
     Files removed/modified:
         <ansible_module_path>/plugins/action/arubaoss.py
         <ansible_module_path>/config/base.yml
+        <ansible_module_path>/modules/network/aruba/aruba_command.py
+        <ansible_module_path>/modules/network/aruba/aruba_config.py
+        <ansible_module_path>/plugins/terminal/aruba.py
+        <ansible_module_path>/plugins/cliconf/aruba.py
+        <ansible_module_path>/plugins/action/aruba.py
 
     :return: None
     """
 
     global SW_PATHS, SRC_PATH, COLORRED, ANS_PATH
     path_list = [CONTROLLER_PATHS, AIRWAVE_PATHS, CLEARPASS_PATHS,
-                 ACTIVATE_PATHS, INSTANT_PATHS] + [SW_PATHS]
+                 ACTIVATE_PATHS, INSTANT_PATHS, CONTROLLER_SSH_PATHS] + [SW_PATHS]
 
     base_yml = ANS_PATH+'config/base.yml'
 
@@ -349,6 +387,7 @@ if __name__ == "__main__":
             install_sw_modules()
         elif args.controller:
             install_wlan_modules(install_package=CONTROLLER_PATHS)
+            install_wlan_modules(install_package=CONTROLLER_SSH_PATHS)
         elif args.airwave:
             install_wlan_modules(install_package=AIRWAVE_PATHS)
         elif args.clearpass:
