@@ -9,14 +9,18 @@ options:
         description:
             - Hostname or IP Address of the Mobility Master.
         required: true
+    access_token:
+        description:
+            - Access token used to authenticate API calls
+        required: false
     client_id:
         description:
             - Username used to login to the Mobility Master
-        required: true
+        required: false
     client_secret:
         description:
             - Password used to login to the Mobility Master
-        required: true
+        required: false
     api_name:
         description:
             - Name of the API to call
@@ -25,9 +29,7 @@ options:
         description:
             - HTTP Method to be used for the API call
         required: true
-        choises:
-            - GET
-            - POST
+        choices: GET, DELETE, POST, PATCH, PUT
     data:
         description:
             - JSON encoded data for the API call
@@ -44,16 +46,26 @@ options:
         required: false
 """
 EXAMPLES = """
-#Usage Examples
-    - name: Create node /md/branch1 in configuration hierarchy
-      arubaos_cppm_config:
-        host: 192.168.1.1
-        client_id: admin
-        client_secret: aruba123
-        api_name: network-device
-        method: POST
-        data: { "name": "new_switch", "ip_address": "1.1.1.1", "radius_secret": "aruba123", "vendor_name": "Aruba" }
-        validate_certs: True
+# Using client credentials
+- name: Add new switch to network devices
+    arubaos_cppm_config:
+    host: 192.168.1.1
+    client_id: admin
+    client_secret: aruba123
+    api_name: network-device
+    method: POST
+    data: { "name": "new_switch", "ip_address": "1.1.1.1", "radius_secret": "aruba123", "vendor_name": "Aruba" }
+    validate_certs: True
+
+# Using an access token
+- name: Add new switch to network devices
+    arubaos_cppm_config:
+    host: 192.168.1.1
+    access_token: 2c2a25d4dee25dab99e3d011d52a8247b11a40df
+    api_name: network-device
+    method: POST
+    data: { "name": "new_switch", "ip_address": "1.1.1.1", "radius_secret": "aruba123", "vendor_name": "Aruba" }
+    validate_certs: True
 """
 
 from ansible.module_utils.basic import *
@@ -138,10 +150,11 @@ def main():
     module = AnsibleModule(
         argument_spec=dict(
             host=dict(required=True, type='str'),
-            client_id=dict(required=True, type='str'),
-            client_secret=dict(required=True, type='str'),
+            access_token=dict(required=False, default=None),
+            client_id=dict(required=False, type='str', default=None),
+            client_secret=dict(required=False, type='str', default=None),
             api_name=dict(required=True, type='str'),
-            method=dict(required=True, type='str', choises=['GET', 'POST']),
+            method=dict(required=True, type='str', choices=['GET', 'DELETE','POST', 'PATCH', 'PUT']),
             data=dict(required=False, type='dict'),
             validate_certs=dict(required=False, type='bool', default=False),
             client_cert=dict(required=False, type='str', default=None), 
@@ -154,9 +167,30 @@ def main():
     method = module.params.get('method')
     data = module.params.get('data')
     module.cookie_file = "aruba_cookie.pkl"
-    module.api_call = {'host':host,'client_id':client_id,'client_secret':client_secret,'api_name':api_name,'method':method,'data':data, 'url':''}
-
-    access_token = login_cppm(module, host, client_id, client_secret)
+    if not access_token:
+        if not (client_id and client_secret):
+            module.fail_json(
+                changed=False, msg="Either an access token or client credentials must be provided!",
+                access_token=access_token, client_id=client_id, client_secret=client_secret
+            )
+        access_token = login_cppm(module, host, client_id, client_secret)
+        module.api_call = {
+            'host':host,
+            'client_id':client_id,
+            'client_secret':client_secret,
+            'api_name':api_name,
+            'method':method,
+            'data':data, 'url':''
+        }
+    else:
+        module.api_call = {
+            'host':host,
+            'access_token': access_token,
+            'api_name':api_name,
+            'method':method,
+            'data':data, 'url':''
+        }
+    
     resp = cppm_api_call(module, host, access_token, api_name, method=method, data=data)
     if resp.code == 200 or resp.code == 201:  # Success
         if method == "POST":
