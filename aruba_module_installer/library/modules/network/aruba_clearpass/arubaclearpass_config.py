@@ -6,40 +6,32 @@ version_added: 0.1
 short_description: Call Mobility Master API
 options:
     host:
-        description:
-            - Hostname or IP Address of the Mobility Master.
+        description: Hostname or IP Address of the Mobility Master.
         required: true
-    access_token:
-        description:
-            - Access token used to authenticate API calls
-        required: false
-    client_id:
-        description:
-            - Username used to login to the Mobility Master
-        required: false
-    client_secret:
-        description:
-            - Password used to login to the Mobility Master
-        required: false
     api_name:
-        description:
-            - Name of the API to call
+        description: API endpoint for which the request is made
         required: true
     method:
-        description:
-            - HTTP Method to be used for the API call
+        description: HTTP Method to be used for the API call
         required: true
         choices: GET, DELETE, POST, PATCH, PUT
+    access_token:
+        description: Access token used to authenticate API calls
+        required: false
+    client_id:
+        description: Username used to login to the Mobility Master
+        required: false
+    client_secret:
+        description: Password used to login to the Mobility Master
+        required: false
     data:
-        description:
-            - JSON encoded data for the API call
+        description: Dictionnary respresenting data to be sent with the request
         required: false
     validate_certs:
-        description:
-            - Validate server certs when this is set to True
+        description: Validate server certs when this is set to True
         required: false
     client_cert:
-        description: (Optional)Provide the path to client cert file for validation in server side.
+        description: (Optional) Provide the path to client cert file for validation in server side.
         required: false 
     client_key:
         description: If the provided client cert does not have the key in it, use this parameter
