@@ -166,6 +166,7 @@ def main():
     api_name = module.params.get('api_name')
     method = module.params.get('method')
     data = module.params.get('data')
+    access_token = module.params.get('access_token')
     module.cookie_file = "aruba_cookie.pkl"
     if not access_token:
         if not (client_id and client_secret):
