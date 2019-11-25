@@ -4,7 +4,7 @@ Description: "This module implements REST API based configuration for Aruba Clea
 
 ##### ARGUMENTS
     host:
-        description: Hostname or IP Address of the Mobility Master.
+        description: Hostname or IP Address of the Clearpass server.
         required: true
     api_name:
         description: API endpoint for which the request is made
@@ -17,10 +17,10 @@ Description: "This module implements REST API based configuration for Aruba Clea
         description: Access token used to authenticate API calls
         required: false
     client_id:
-        description: Username used to login to the Mobility Master
+        description: API client ID used to retrieve access tokens
         required: false
     client_secret:
-        description: Password used to login to the Mobility Master
+        description: API Client secret used to retrieve access tokens
         required: false
     data:
         description: Dictionnary respresenting data to be sent with the request

@@ -6,7 +6,7 @@ version_added: 0.1
 short_description: Call Mobility Master API
 options:
     host:
-        description: Hostname or IP Address of the Mobility Master.
+        description: Hostname or IP Address of the Clearpass server.
         required: true
     api_name:
         description: API endpoint for which the request is made
@@ -19,10 +19,10 @@ options:
         description: Access token used to authenticate API calls
         required: false
     client_id:
-        description: Username used to login to the Mobility Master
+        description: API client ID used to retrieve access tokens
         required: false
     client_secret:
-        description: Password used to login to the Mobility Master
+        description: API Client secret used to retrieve access tokens
         required: false
     data:
         description: Dictionnary respresenting data to be sent with the request
@@ -42,8 +42,8 @@ EXAMPLES = """
 - name: Add new switch to network devices
     arubaos_cppm_config:
     host: 192.168.1.1
-    client_id: admin
-    client_secret: aruba123
+    client_id: apiadmin
+    client_secret: 4O7QKMrpPiKFoMtR5J/2DQwC6TzHfUloJDJXSYkYl1Uc
     api_name: network-device
     method: POST
     data: { "name": "new_switch", "ip_address": "1.1.1.1", "radius_secret": "aruba123", "vendor_name": "Aruba" }
