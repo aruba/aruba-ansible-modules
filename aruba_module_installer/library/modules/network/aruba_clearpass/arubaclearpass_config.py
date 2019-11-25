@@ -162,7 +162,7 @@ def main():
         if method == "POST":
             module.exit_json(changed=True, msg=resp.msg, status_code=int(resp.code))
         else:
-            module.exit_json(changed=False, msg=result, status_code=int(resp.code))
+            module.exit_json(changed=False, msg=resp.msg, status_code=int(resp.code))
     else:  # Call failed
         err = json.loads(resp.read())
         module.fail_json(changed=False, msg="API Call failed!",
