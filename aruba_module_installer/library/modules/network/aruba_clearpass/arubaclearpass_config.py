@@ -142,12 +142,12 @@ def main():
     module = AnsibleModule(
         argument_spec=dict(
             host=dict(required=True, type='str'),
+            api_name=dict(required=True, type='str'),
             access_token=dict(required=False, default=None),
             client_id=dict(required=False, type='str', default=None),
             client_secret=dict(required=False, type='str', default=None),
-            api_name=dict(required=True, type='str'),
             method=dict(required=True, type='str', choices=['GET', 'DELETE','POST', 'PATCH', 'PUT']),
-            data=dict(required=False, type='dict'),
+            data=dict(required=False, type='dict', default={}),
             validate_certs=dict(required=False, type='bool', default=False),
             client_cert=dict(required=False, type='str', default=None), 
             client_key=dict(required=False, type='str', default=None)
@@ -160,6 +160,12 @@ def main():
     data = module.params.get('data')
     access_token = module.params.get('access_token')
     module.cookie_file = "aruba_cookie.pkl"
+    module.api_call = {
+        'host':host,
+        'api_name':api_name,
+        'method':method,
+        'data':data, 'url':''
+    }
     if not access_token:
         if not (client_id and client_secret):
             module.fail_json(
@@ -167,22 +173,10 @@ def main():
                 access_token=access_token, client_id=client_id, client_secret=client_secret
             )
         access_token = login_cppm(module, host, client_id, client_secret)
-        module.api_call = {
-            'host':host,
-            'client_id':client_id,
-            'client_secret':client_secret,
-            'api_name':api_name,
-            'method':method,
-            'data':data, 'url':''
-        }
+        module.api_call['client_id'] = client_id
+        module.api_call['client_secret'] = client_secret
     else:
-        module.api_call = {
-            'host':host,
-            'access_token': access_token,
-            'api_name':api_name,
-            'method':method,
-            'data':data, 'url':''
-        }
+        module.api_call['access_token'] = access_token
     
     resp = cppm_api_call(module, host, access_token, api_name, method=method, data=data)
     if resp.code == 200 or resp.code == 201:  # Success
