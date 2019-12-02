@@ -180,10 +180,10 @@ def main():
     
     resp = cppm_api_call(module, host, access_token, api_name, method=method, data=data)
     if resp.code == 200 or resp.code == 201:  # Success
-        if method == "POST":
-            module.exit_json(changed=True, msg=resp.msg, status_code=int(resp.code))
+        if method in ["POST", "PUT", "PATCH"]:
+            module.exit_json(changed=True, msg=resp.msg, status_code=int(resp.code), json=json.load(resp))
         else:
-            module.exit_json(changed=False, msg=result, status_code=int(resp.code))
+            module.exit_json(changed=False, msg=resp.msg, status_code=int(resp.code), json=json.load(resp))
     else:  # Call failed
         err = json.loads(resp.read())
         module.fail_json(changed=False, msg="API Call failed!",
