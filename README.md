@@ -17,6 +17,7 @@ The aruba_module_installer.py tool installs all files/directories required by An
 * Linux operating system
 * Python 2.7 or 3.5+
 * Ansible version 2.5 or later
+* For AOS-Switch firmware version **16.08** and above is supported
 
 
 ## How to run this code
