@@ -1,0 +1,45 @@
+---
+- hosts: all
+  gather_facts: False
+  tasks:
+    - name: Configure Radius server 10.0.0.1 with shared secret RADIUS!
+      arubaoss_radius_profile:
+        command: config_radius_server
+        server_ip: 10.0.0.1
+        shared_secret: "RADIUS!"
+
+    - name: Configure Global Radius Profile key
+      arubaoss_radius_profile:
+        command: config_radius_profile
+        key: "RADIUS!"
+
+    - name: Configure Radius Profile CPPM details for User Roles
+      arubaoss_radius_profile:
+        command: config_radius_profile
+        cppm_details: {'username':'superman','password': 'upupandaway'}
+
+    - name: Configure Radius Server -
+      arubaoss_radius_profile:
+        command: config_radius_server
+        server_ip: 10.0.0.1
+        shared_secret: "RADIUS!"
+        is_dyn_authorization_enabled: True
+        time_window: 0
+
+    - name: Configure Radius Server Group
+      arubaoss_radius_profile:
+        command: config_radius_serverGroup
+        server_ip: 10.0.0.1
+        server_group_name: SUPER
+
+    - name: Configure Radius server 10.1.1.1 with shared secret ARUBA!
+      arubaoss_radius_profile:
+        command: config_radius_server
+        server_ip: 10.1.1.1
+        shared_secret: "ARUBA!"
+
+    - name: Configure Radius server group
+      arubaoss_radius_profile:
+        command: config_radius_serverGroup
+        server_group_name: AVENGERS
+        server_ip: 10.1.1.1
