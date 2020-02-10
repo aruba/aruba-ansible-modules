@@ -130,6 +130,21 @@ def login_api_mm(module):
                    'session_token': session_key}
     return session_dict
 
+def logout(module, session_token):
+    host = module.params.get('host')
+    url = "https://" + str(host) + ":4343/v1/api/logout"
+    headers = headers = {'Accept': 'application/json', 'Cookie': 'SESSION=' + str(session_token)}
+    cookies = cookiejar.LWPCookieJar()
+    validate_certs = module.params.get('validate_certs')
+    client_cert = module.params.get('client_cert')
+    client_key = module.params.get('client_key')
+    http_agent = 'ansible-httpget'
+    follow_redirects = 'urllib2'
+    method = "GET"
+    return open_url(url, headers=headers, method=method, validate_certs=validate_certs,
+                    http_agent=http_agent, follow_redirects=follow_redirects, cookies=cookies,
+                    client_cert=client_cert, client_key=client_key)
+
 def mm_api_call(module, session):
     host = module.params.get('host', session['host'])
     username = module.params.get('username')
@@ -147,6 +162,7 @@ def mm_api_call(module, session):
     http_agent = 'ansible-httpget'
     follow_redirects = 'urllib2'
     session_token = session['session_token']
+
     if not host:
         host = session['host']
     module.api_call = {'host':host,'username':username,'password':password,'api_name':api_name,'method':method,'config_path':config_path,'data':data, 'url':''}
@@ -156,7 +172,6 @@ def mm_api_call(module, session):
         url = "https://" + str(host) + ":4343/v1/configuration/object/" + str(api_name) + "?config_path=" + str(config_path) + "&UIDARUBA=" + str(session_token)
     else:
         url = "https://" + str(host) + ":4343/v1/configuration/object/" + str(api_name) + "?UIDARUBA=" + str(session_token)
-
 
     # Store the url to module, so we can print the details in case of error
     module.api_call['url'] = url
@@ -186,19 +201,24 @@ def mm_api_call(module, session):
         if method == "POST":
             # Result will contain "Error" key if the request was made with wrong api name and data
             if "Error" in result.keys():
+                logout(module, session_token)
                 module.fail_json(changed=False, msg="API Call failed! Check api name and data", reason=result['Error'], api_call=module.api_call)
 
             result = result['_global_result']
             if result['status'] == 0:
+                logout(module, session_token)
                 module.exit_json(changed=True, msg=str(result['status_str']), status_code=int(resp.code))
             # Skip if result status is either 2 and 1. Example trying to delete something that do not exist will return such status 
             elif result['status'] == 2 or result['status'] == 1:
+                logout(module, session_token)
                 module.exit_json(skipped=True, msg=str(result['status_str']), status_code=int(resp.code))
             else:
+                logout(module, session_token)
                 module.fail_json(changed=False, msg="API Call failed!", reason=result['status_str'], api_call=module.api_call)
         # if method is GET
         else:
             if resp.code == 200:
+                logout(module, session_token)
                 module.exit_json(changed=False, msg=result['_data'], status_code=resp.code, response=result)
             else:
                 raise Exception("API call failed with status code %d" % int(resp.code))
@@ -231,12 +251,14 @@ def main():
         if host and username and password:
             session = login_api_mm(module)
         else:
+            logout(module, session_token)
             module.fail_json(changed=False, msg="Check if host, username and password are provided. Else generate session dict using arubaos session ansible module")
     # Check if the sesstion token is present and call to POST/GET REST API commands
     #if session_token is not '' and session_token:
     if session and 'session_token' in session.keys():
         mm_api_call(module, session)
     else:
+        logout(module, session_token)
         module.fail_json(changed=False, msg="Unable to create the session token")
 
 
