@@ -137,6 +137,7 @@ EXAMPLES = '''
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.network.arubaoss.arubaoss import run_commands
 from ansible.module_utils.network.arubaoss.arubaoss import get_config
+from ansible.module_utils.network.arubaoss.arubaoss import get_firmware
 from ansible.module_utils.network.arubaoss.arubaoss import arubaoss_argument_spec
 from ansible.module_utils._text import to_text
 import json
@@ -366,10 +367,8 @@ def config_vlan(module):
     data['is_voice_enabled'] = params['is_voice_enabled']
     data['is_dsnoop_enabled'] = params['is_dsnoop_enabled']
 
-    firmware_url = "/system/status"
-    check_firmware_version = get_config(module, firmware_url)
-    dhcp_server = module.from_json(to_text(check_firmware_version))
-    if (dhcp_server['firmware_version'][:2] == "YA") or (dhcp_server['firmware_version'][:2] == "YB"):
+    firmware = get_firmware(module)
+    if (firmware[:2] == "YA") or (firmware[:2] == "YB"):
         if params['is_dhcp_server_enabled']:
             return {'msg': "option : is_dhcp_server_enabled is not supported on this platform",
                     'changed': False, 'failed': True}

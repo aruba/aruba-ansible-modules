@@ -368,6 +368,21 @@ class Aossapi:
                     return data
         return None
 
+    def get_firmware(self):
+        # Below REST API does not work on stacked switches
+        firmware_url = "/system/status"
+        stacked_firmware_url = "/system/status/global_info"
+        try:
+            check_firmware_version = self.get_config(firmware_url)
+            firmware = self._module.from_json(to_text(check_firmware_version))
+            return firmware['firmware_version']
+        except:
+            # If try block fails then it is a stacked switch, we should be using
+            # "/system/status/global_info" REST API to get the firmware version
+            check_firmware_version = self.get_config(stacked_firmware_url)
+            firmware = self._module.from_json(to_text(check_firmware_version))
+            return firmware['firmware_version']
+
 def get_config(module, *args, **kwargs):
     conn = get_connection(module)
     return conn.get_config(*args, **kwargs)
@@ -377,3 +392,6 @@ def run_commands(module, commands, *args, **kwargs):
     conn = get_connection(module)
     return conn.run_commands(commands, *args, **kwargs)
 
+def get_firmware(module):
+    conn = get_connection(module)
+    return conn.get_firmware()
