@@ -1,0 +1,19 @@
+- name: Add a new Managed Device to an existing node-hierarchy
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_files:
+    - variables.txt
+
+  tasks:
+
+    - name: Adding MD to hierarchy
+      arubaos_controller_config:
+        host: "{{ mm_ip }}"
+        username: "{{ mm_username }}"
+        password: "{{ mm_password }}"
+        method: POST
+        config_path: /md
+        api_name: configuration_device
+        data: { "dev-model": "A7010","mac-address": "ff:ff:ff:ff:ff:ff", "config-path": "md/SLR" }
+
