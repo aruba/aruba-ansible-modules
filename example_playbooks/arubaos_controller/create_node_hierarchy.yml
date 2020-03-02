@@ -1,0 +1,18 @@
+- name: Create a new node hierarchy
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_files:
+    - variables.txt
+
+  tasks:
+
+    - name: Create a Hierarchy node
+      arubaos_controller_config:
+        host: "{{ mm_ip }}"
+        username: "{{ mm_username }}"
+        password: "{{ mm_password }}"
+        method: POST
+        config_path: /md
+        api_name: configuration_node
+        data: { "node-path": "/md/SLR"}
