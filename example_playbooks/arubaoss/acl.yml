@@ -11,13 +11,84 @@
         acl_source_mask: 255.255.255.255
         acl_action: AA_PERMIT
 
-    - name: Create Extended acl permit_all
+    - name: Create ip access-list extended permit_all with rule permit ip any any
       arubaoss_acl_policy:
         acl_name: permit_all
         source_ip_address: 0.0.0.0
         source_ip_mask: 255.255.255.255
         destination_ip_address: 0.0.0.0
         destination_ip_mask: 255.255.255.255
+        acl_action: AA_PERMIT
+        protocol_type: PT_IP
+        acl_type: AT_EXTENDED_IPV4
+
+    - name: Create ip access-list extended permit_port_80 with rule permit tcp any eq 80
+      arubaoss_acl_policy:
+        acl_name: permit_port_80
+        source_ip_address: 0.0.0.0
+        source_ip_mask: 255.255.255.255
+        protocol_type: PT_TCP
+        source_port:
+          port_not_equal: 0       # Set to 0
+          port_range_start: 80    # Set to equal port
+          port_range_end: 80      # Set to equal port
+        destination_ip_address: 0.0.0.0
+        destination_ip_mask: 255.255.255.255
+        destination_port: {"port_not_equal": 0,"port_range_start": 80,"port_range_end": 80}
+        acl_action: AA_PERMIT
+        acl_type: AT_EXTENDED_IPV4
+
+    - name: Create ip access-list extended deny_all_ports_not_80 with rule deny tcp any neq 80
+      arubaoss_acl_policy:
+        acl_name: deny_all_ports_not_80
+        source_ip_address: 0.0.0.0
+        source_ip_mask: 255.255.255.255
+        protocol_type: PT_TCP
+        source_port:
+          port_not_equal: 80       # Set to neq port
+          port_range_start: 0
+          port_range_end: 0
+        destination_ip_address: 0.0.0.0
+        destination_ip_mask: 255.255.255.255
+        destination_port: {"port_not_equal": 80,"port_range_start": 0,"port_range_end": 0}
+        acl_action: AA_PERMIT
+        acl_type: AT_EXTENDED_IPV4
+
+    - name: Create ip access-list extended deny_all_ports_less_than_80 with rule deny tcp any lt 80
+      arubaoss_acl_policy:
+        acl_name: deny_all_ports_less_than_80
+        source_ip_address: 0.0.0.0
+        source_ip_mask: 255.255.255.255
+        protocol_type: PT_TCP
+        source_port:
+          port_not_equal: 0       # Set to 0
+          port_range_start: 1     # Start is 1
+          port_range_end: 79      # End is port - 1
+        destination_ip_address: 0.0.0.0
+        destination_ip_mask: 255.255.255.255
+        destination_port:
+          port_not_equal: 0       # Set to 0
+          port_range_start: 1     # Start is 1
+          port_range_end: 79      # End is port - 1
+        acl_action: AA_PERMIT
+        acl_type: AT_EXTENDED_IPV4
+
+    - name: Create ip access-list extended deny_all_ports_gt_than_80 with rule deny tcp any gt 80
+      arubaoss_acl_policy:
+        acl_name: deny_all_ports_gt_than_80
+        source_ip_address: 0.0.0.0
+        source_ip_mask: 255.255.255.255
+        protocol_type: PT_TCP
+        source_port:
+          port_not_equal: 0       # Set to 0
+          port_range_start: 81    # Start is 1 + port
+          port_range_end: 65535   # Highest port value is 65535
+        destination_ip_address: 0.0.0.0
+        destination_ip_mask: 255.255.255.255
+        destination_port:
+          port_not_equal: 0       # Set to 0
+          port_range_start: 81    # Start is 1 + port
+          port_range_end: 65535   # Highest port value is 65535
         acl_action: AA_PERMIT
         acl_type: AT_EXTENDED_IPV4
 
