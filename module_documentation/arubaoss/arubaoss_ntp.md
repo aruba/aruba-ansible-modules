@@ -1,7 +1,12 @@
 # NTP
 Module: ****arubaoss_ntp****  
 Description: "This implements rest apis which can be used to configure NTP"
-
+  
+##### LIMITATIONS
+* The AOS-Switch platform 2920 is not compatible with this module. This module utilizes REST API
+ commands that are not supported with this platform.
+  * Recommended workaround is to use the SSH CLI module for NTP configuration commands.  
+  
 ##### ARGUMENTS
     command:
         description: To configure a specific feature of NTP -
