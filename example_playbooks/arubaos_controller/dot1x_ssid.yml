@@ -3,7 +3,7 @@
   connection: local
   gather_facts: no
   vars_files:
-    - variables.txt
+    - variables.yml
 
   tasks:
 
@@ -16,6 +16,7 @@
         config_path: /md/SLR/Bldg1
         api_name: rad_server
         data: { "rad_server_name": "test_dot1x" ,"rad_host": {"host": "1.1.1.1"} }
+        verify_cert: True
 
     - name: Create server group
       arubaos_config:
@@ -26,6 +27,7 @@
         config_path: /md/SLR/Bldg1
         api_name: server_group_prof
         data: { "sg_name": "test_dot1x", "auth_server":[{ "name": "test_dot1x"}] }
+        verify_cert: True
 
     - name: Create a ssid prof
       arubaos_config:
@@ -36,6 +38,7 @@
         config_path: /md/SLR/Bldg1
         api_name: ssid_prof
         data: { "profile-name": "test_dot1x", "essid":{"essid":"test_dot1x"}, "opmode":{"wpa2-aes":true} }
+        verify_cert: True
 
     - name: Create a dot1x profile
       arubaos_config:
@@ -46,6 +49,7 @@
         config_path: /md/SLR/Bldg1
         api_name: dot1x_auth_profile
         data: { "profile-name": "test_dot1x" }
+        verify_cert: True
 
     - name: Create a aaa prof
       arubaos_config:
@@ -56,6 +60,7 @@
         config_path: /md/SLR/Bldg1
         api_name: aaa_prof
         data: { "profile-name": "test_dot1x", "dot1x_auth_profile": {"profile-name" : "test_dot1x"}, "dot1x_server_group": {"srv-group": "test_dot1x"} }
+        verify_cert: True
 
     - name: Create a vap
       arubaos_config:
@@ -66,6 +71,7 @@
         config_path: /md/SLR/Bldg1
         api_name: virtual_ap
         data: { "profile-name": "test_dot1x", "aaa_prof": {"profile-name": "test_dot1x"}, "ssid_prof": {"profile-name": "test_dot1x"},  }
+        verify_cert: True
 
     - name: Create an apgroup
       arubaos_config:
@@ -76,3 +82,4 @@
         config_path: /md/SLR/Bldg1
         api_name: ap_group
         data: { "profile-name": "test_apgroup" ,"virtual_ap": [{"profile-name": "test_dot1x"}] }
+        verify_cert: True

@@ -2,13 +2,16 @@
   hosts: localhost
   connection: local
   gather_facts: no
+  vars_files:
+    - variables.yml
   tasks:
     - name: Create an apgroup
       arubaos_controller_config:
-        host: <mm-ip>
-        username: <mm-username>
-        password: <mm-password>
-        method: POST
-        config_path: <config_path>
+        host: "{{ mm_ip }}"
+        username: "{{ mm_username }}"
+        password: "{{ mm_password }}"
+        method: "{{ method_type }}"
+        config_path: "{{ configuration_path }}"
         api_name: dot1x_auth_profile
-        data: { "profile-name": "jay_test_dot1x" }
+        data: { "profile-name": "test_test_dot1x" }
+        verify_cert: True

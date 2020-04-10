@@ -3,7 +3,7 @@
   connection: local
   gather_facts: no
   vars_files:
-    - variables.txt
+    - variables.yml
   tasks:
     - name: Execute a show version command
       arubaos_controller_config:
@@ -14,6 +14,7 @@
         config_path: "{{ configuration_path }}"
         api_name: showcommand
         data: { "command": "show version" }
+        verify_cert: True
 
     - name: Get all the configuration of a node
       arubaos_controller_config:
@@ -23,3 +24,4 @@
         method: "GET"
         config_path: "{{ configuration_path }}"
         api_name: config
+        verify_cert: True
