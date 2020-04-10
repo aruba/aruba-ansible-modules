@@ -3,7 +3,7 @@
   connection: local
   gather_facts: no
   vars_files:
-    - variables.txt
+    - variables.yml
 
   tasks:
     - name: Delete the virtual AP profile from the AP Group
@@ -11,108 +11,119 @@
          host: "{{ mm_ip }}"
          username: "{{ mm_username }}"
          password: "{{ mm_password }}"
-         method: POST
+         method: "{{ method_type }}"
+         config_path: "{{ configuration_path }}"
          api_name: ap_group
-         config_path: /md
          data: { "profile-name": "apgrp-guest-demo", "virtual_ap": [ { "profile-name": "vap-guest-demo", "_action": "delete" } ] }
+         verify_cert: True
 
     - name: Delete the virtual ap profile
       arubaos_controller_config:
          host: "{{ mm_ip }}"
          username: "{{ mm_username }}"
          password: "{{ mm_password }}"
-         method: POST
+         method: "{{ method_type }}"
+         config_path: "{{ configuration_path }}"
          api_name: virtual_ap
-         config_path: /md
          #data: { "profile-name": "vap-guest-demo", "aaa_prof": { "profile-name": "aaa-guest-demo" }, "vlan": { "vlan": "16" }, "ssid_prof": { "profile-name": "ssid-guest-demo" }, "_action": "delete" }
          data: { "profile-name": "vap-guest-demo",  "_action": "delete" }
+         verify_cert: True
 
     - name: Delete the aaa profile
       arubaos_controller_config:
          host: "{{ mm_ip }}"
          username: "{{ mm_username }}"
          password: "{{ mm_password }}"
-         method: POST
+         method: "{{ method_type }}"
+         config_path: "{{ configuration_path }}"
          api_name: aaa_prof
-         config_path: /md
          data: { "profile-name": "aaa-guest-demo", "_action": "delete" }
+         verify_cert: True
 
     - name: Delete the guest user logon role
       arubaos_controller_config:
          host: "{{ mm_ip }}"
          username: "{{ mm_username }}"
          password: "{{ mm_password }}"
-         method: POST
+         method: "{{ method_type }}"
+         config_path: "{{ configuration_path }}"
          api_name: role
-         config_path: /md
          data: { "rname": "usr-guest-demo", "_action": "delete" }
+         verify_cert: True
 
     - name: Delete the captive portal authentication profile
       arubaos_controller_config:
          host: "{{ mm_ip }}"
          username: "{{ mm_username }}"
          password: "{{ mm_password }}"
-         method: POST
+         method: "{{ method_type }}"
+         config_path: "{{ configuration_path }}"
          api_name: cp_auth_profile
-         config_path: /md
          data: { "profile-name": "cp-guest-demo", "_action": "delete" }
+         verify_cert: True
 
     - name: Delete the user role assigned after captive portal authentication
       arubaos_controller_config:
          host: "{{ mm_ip }}"
          username: "{{ mm_username }}"
          password: "{{ mm_password }}"
-         method: POST
+         method: "{{ method_type }}"
+         config_path: "{{ configuration_path }}"
          api_name: role
-         config_path: /md
          data: { "rname": "demo", "_action": "delete" }
+         verify_cert: True
 
     - name: Delete the policy with session acls and time range
       arubaos_controller_config:
          host: "{{ mm_ip }}"
          username: "{{ mm_username }}"
          password: "{{ mm_password }}"
-         method: POST
+         method: "{{ method_type }}"
+         config_path: "{{ configuration_path }}"
          api_name: acl_sess
-         config_path: /md
          data: { "accname": "acl-guest-demo-time-range", "_action": "delete" }
+         verify_cert: True
 
     - name: Delete the netdestination for the authenticated clients
       arubaos_controller_config:
          host: "{{ mm_ip }}"
          username: "{{ mm_username }}"
          password: "{{ mm_password }}"
-         method: POST
+         method: "{{ method_type }}"
+         config_path: "{{ configuration_path }}"
          api_name: netdst
-         config_path: /md
          data: { "dstname": "netdst-guest-demo", "_action": "delete" }
+         verify_cert: True
 
     - name: Delete the periodic time range
       arubaos_controller_config:
          host: "{{ mm_ip }}"
          username: "{{ mm_username }}"
          password: "{{ mm_password }}"
-         method: POST
+         method: "{{ method_type }}"
+         config_path: "{{ configuration_path }}"
          api_name: time_range_per
-         config_path: /md
          data: { "name": "guest-demo-working-hrs", "_action": "delete" }
+         verify_cert: True
 
     - name: Delete the ssid profile with essid and opmode
       arubaos_controller_config:
          host: "{{ mm_ip }}"
          username: "{{ mm_username }}"
          password: "{{ mm_password }}"
-         method: POST
+         method: "{{ method_type }}"
+         config_path: "{{ configuration_path }}"
          api_name: ssid_prof
-         config_path: /md
          data: { "profile-name": "ssid-guest-demo", "_action": "delete" }
+         verify_cert: True
 
     - name: Save Pending Changes / write memory
       arubaos_controller_config:
          host: "{{ mm_ip }}"
          username: "{{ mm_username }}"
          password: "{{ mm_password }}"
-         method: "POST"
+         method: "{{ method_type }}"
+         config_path: "{{ configuration_path }}"
          data: "{}"
          api_name: write_memory
-         config_path: "/md"
+         verify_cert: True

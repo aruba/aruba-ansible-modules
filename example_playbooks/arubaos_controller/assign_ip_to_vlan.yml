@@ -3,7 +3,7 @@
   connection: local
   gather_facts: no
   vars_files:
-    - variables.txt
+    - variables.yml
   tasks:
     - name: Create a vlan
       arubaos_controller_config:
@@ -14,3 +14,4 @@
         api_name: int_vlan
         config_path: "{{ configuration_path }}"
         data: { "id": "{{ vlan_id }}", "int_vlan_ip": {"ipaddr": "{{ vlan_ip_address }}", "ipmask": "{{ ip_mask }}" }}
+        verify_cert: True

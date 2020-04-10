@@ -3,7 +3,7 @@
   connection: local
   gather_facts: no
   vars_files:
-    - variables.txt
+    - variables.yml
 
   tasks:
 
@@ -16,6 +16,7 @@
         config_path: "{{ configuration_path }}"
         api_name: acl_sess
         data: { "accname": "mobilefirst-allow-captiveportal", "acl_sess__v4policy": [{"suser": true,"src": "suser","dipaddr": "{{ cppm_ip }}","dst": "dhost","service-name": "svc-http","svc": "service-name","service_app": "service","permit": true,"action": "permit" },{"suser": true,"src": "suser","dipaddr": "{{ cppm_ip }}","dst": "dhost","service-name": "svc-https","svc": "service-name","service_app": "service","permit": true,"action": "permit"}]}
+        verify_cert: True
 
     - name: Create a policy to prevent BYOD clients from acting as a DHCP server
       arubaos_controller_config:
@@ -26,6 +27,7 @@
         config_path: "{{ configuration_path }}"
         api_name: acl_sess
         data: { "accname": "Mobilefirst-byod_employee-deny-client-as-dhcp-server", "acl_sess__v4policy": [{"suser": true,"src": "suser","dany": true,"dst": "dany","proto": "udp","svc": "tcp_udp","service_app": "service","port1": 68,"port": "range","deny": true,"action": "deny_opt"}],"acl_sess__v6policy": [{"suser": true,"src": "suser","dany": true,"dst": "dany","rtr-adv": true,"icmp_type": "rtr-adv","svc": "icmpv6","service_app": "service","deny": true,"action": "deny_opt"}]}
+        verify_cert: True
 
     - name: Create a policy to allow all other traffic
       arubaos_controller_config:
@@ -36,6 +38,7 @@
         config_path: "{{ configuration_path }}"
         api_name: acl_sess
         data: { "accname": "Mobilefirst-byod_employee-allowall", "acl_sess__v4policy": [{"sany": true,"src": "sany","dany": true,"dst": "dany","service-any": true,"svc": "service-any","permit": true,"action": "permit"}],"acl_sess__v6policy": [{"sany": true,"src": "sany","dany": true,"dst": "dany","service-any": true,"svc": "service-any","service_app": "service","permit": true,"action": "permit"}]}
+        verify_cert: True
 
     - name: Create a role named "onboard" and add appropriate ACLs.
       arubaos_controller_config:
@@ -46,6 +49,7 @@
         config_path: "{{ configuration_path }}"
         api_name: role
         data: { "rname": "onboard","role__acl": [ {"acl_type": "session","pname": "mobilefirst-allow-captiveportal"},{"acl_type": "session","pname": "logon-control"},{"acl_type": "session","pname": "captiveportal"}]}
+        verify_cert: True
 
     - name: Create a role named "Mobilefirst-byod_employee" and add appropriate ACLs.
       arubaos_controller_config:
@@ -56,6 +60,7 @@
         config_path: "{{ configuration_path }}"
         api_name: role
         data: { "rname": "Mobilefirst-byod_employee","role__acl": [ {"acl_type": "session","pname": "Mobilefirst-byod_employee-deny-client-as-dhcp-server"},{"acl_type": "session","pname": "Mobilefirst-byod_employee-allowall"}]}
+        verify_cert: True
 
     - name: Create a RADIUS server
       arubaos_controller_config:
@@ -66,6 +71,7 @@
         config_path: "{{ configuration_path }}"
         api_name: rad_server
         data: { "rad_server_name": "CP-Corp-Server","rad_host": {"host": "{{ cppm_ip }}"},"rad_key": {"key": "{{ radius_key }}"},"rad_mac_delimiter": {"mba_delimiter_t": "colon"}}
+        verify_cert: True
 
     - name: Create a Server Group and add Previously created RADIUS server
       arubaos_controller_config:
@@ -76,6 +82,7 @@
         config_path: "{{ configuration_path }}"
         api_name: server_group_prof
         data: { "sg_name": "CP-Corp-ServerGroup","auth_server": [{"name": "CP-Corp-Server"}]}
+        verify_cert: True
 
     - name: Define a RFC3576 Server
       arubaos_controller_config:
@@ -86,6 +93,7 @@
         config_path: "{{ configuration_path }}"
         api_name: rfc3576_client_prof
         data: {"server_ip": "{{ cppm_ip }}","rfc3576_secret": {"key": "{{ rfc_key }}"}}
+        verify_cert: True
 
     - name: Define Dot1x Auth Profile
       arubaos_controller_config:
@@ -96,6 +104,7 @@
         config_path: "{{ configuration_path }}"
         api_name: dot1x_auth_profile
         data: { "profile-name": "MobileFirst-byod_employee_dot1x_auth_prof"}
+        verify_cert: True
 
     - name: Create AAA Profile
       arubaos_controller_config:
@@ -106,6 +115,7 @@
         config_path: "{{ configuration_path }}"
         api_name: aaa_prof
         data: { "profile-name": "MobileFirst-byod_employee_AAA_Prof","default_user_role": {"role": "onboard"},"dot1x_auth_profile": {"profile-name": "MobileFirst-byod_employee_dot1x_auth_prof"},"dot1x_default_role": {"default-role": "onboard"},"dot1x_server_group": {"srv-group": "CP-Corp-ServerGroup"},"rad_acct_sg": {"server_group_name": "CP-Corp-ServerGroup"},"rfc3576_client": [{"rfc3576_server": "{{ cppm_ip }}"}]}
+        verify_cert: True
 
     - name: Create a Netdestination "google-play"
       arubaos_controller_config:
@@ -116,6 +126,7 @@
         config_path: "{{ configuration_path }}"
         api_name: netdst
         data: { "dstname": "google-play", "netdst__entry": [ { "host_name": "*.ggpht.com", "_objname": "netdst__name" }, { "host_name": "*.gstatic.com", "_objname": "netdst__name" }, { "host_name": "*.android.clients.google.com", "_objname": "netdst__name" }, { "host_name": "*.accounts.google.com", "_objname": "netdst__name" }, { "host_name": "*.clients1.google.com", "_objname": "netdst__name" }, { "host_name": "*.clients2.google.com", "_objname": "netdst__name" }, { "host_name": "*.clients3.google.com", "_objname": "netdst__name" }, { "host_name": "*.clients4.google.com", "_objname": "netdst__name" }, { "host_name": "*.i.ytimg.com", "_objname": "netdst__name" }, { "host_name": "*.google-analytics.com", "_objname": "netdst__name" }, { "host_name": "*.android.l.google.com", "_objname": "netdst__name" }, { "host_name": "*.mtalk.google.com", "_objname": "netdst__name" }, { "host_name": "*.clients.l.google.com", "_objname": "netdst__name" }, { "host_name": "*.googleapis.com", "_objname": "netdst__name" }, { "host_name": "*.play.google.com", "_objname": "netdst__name" }, { "host_name": "*.1e100.net", "_objname": "netdst__name" }, { "host_name": "*.gvt1.com", "_objname": "netdst__name" }, { "host_name": "*.l.googleusercontent.com", "_objname": "netdst__name" }, { "host_name": "*.ggpht.net", "_objname": "netdst__name" }, { "host_name": "android.clients.google.com", "_objname": "netdst__name" }, { "host_name": "ggpht.com", "_objname": "netdst__name" }, { "host_name": "gstatic.com", "_objname": "netdst__name" }, { "host_name": "accounts.google.com", "_objname": "netdst__name" }, { "host_name": "clients1.google.com", "_objname": "netdst__name" }, { "host_name": "clients2.google.com", "_objname": "netdst__name" }, { "host_name": "clients3.google.com", "_objname": "netdst__name" }, { "host_name": "clients4.google.com", "_objname": "netdst__name" }, { "host_name": "i.ytimg.com", "_objname": "netdst__name" }, { "host_name": "google-analytics.com", "_objname": "netdst__name" }, { "host_name": "android.l.google.com", "_objname": "netdst__name" }, { "host_name": "mtalk.google.com", "_objname": "netdst__name" }, { "host_name": "clients.l.google.com", "_objname": "netdst__name" }, { "host_name": "googleapis.com", "_objname": "netdst__name" }, { "host_name": "play.google.com", "_objname": "netdst__name" }, { "host_name": "1e100.net", "_objname": "netdst__name" }, { "host_name": "gvt1.com", "_objname": "netdst__name" }, { "host_name": "l.googleusercontent.com", "_objname": "netdst__name" }, { "host_name": "ggpht.net", "_objname": "netdst__name" } ] }
+        verify_cert: True
 
     - name: Create Captive Portal Profile
       arubaos_controller_config:
@@ -126,6 +137,7 @@
         config_path: "{{ configuration_path }}"
         api_name: cp_auth_profile
         data: { "profile-name": "MobileFirst-onboard","cp_default_role": {"default-role": "onboard"},"cp_server_group": {"server-group": "CP-Corp-ServerGroup"},"cp_redirect_pause": {"redirect-pause": 3},"cp_login_location": {"login-page": "https://cp-corp123.aruba-tme.com/onboard/byod_employee_onboard.php"},"cp_welcome_location": {"welcome-page": "/auth/welcome.html"},"cp_white_list": [{"white-list": "google-play"}],"url_hash_key": {"url-hash-key": "{{ url_hash_key }}"}}
+        verify_cert: True
 
     - name: Create a SSID Prof
       arubaos_controller_config:
@@ -136,6 +148,7 @@
         config_path: "{{ configuration_path }}"
         api_name: ssid_prof
         data: { "profile-name": "MobileFirst-byod_employee", "essid":{"essid":"TME-MobileFirst-byod_employee"}, "opmode":{"wpa2-aes":true} }
+        verify_cert: True
 
     - name: Create a VAP
       arubaos_controller_config:
@@ -146,6 +159,7 @@
         config_path: "{{ configuration_path }}"
         api_name: virtual_ap
         data: { "profile-name": "MobileFirst-byod_employee", "aaa_prof": {"profile-name": "MobileFirst-byod_employee_AAA_Prof"}, "ssid_prof": {"profile-name": "MobileFirst-byod_employee"}, "vlan": {"vlan": "18"}  }
+        verify_cert: True
 
     - name: Create an apgroup
       arubaos_controller_config:
@@ -156,3 +170,4 @@
         config_path: "{{ configuration_path }}"
         api_name: ap_group
         data: { "profile-name": "CampusAP" ,"virtual_ap": [{"profile-name": "MobileFirst-byod_employee"}] }
+        verify_cert: True

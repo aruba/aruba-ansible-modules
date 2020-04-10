@@ -3,7 +3,7 @@
   connection: local
   gather_facts: no
   vars_files:
-    - variables.txt
+    - variables.yml
   tasks:
     - name: Add two vlans and a vlan range
       arubaos_controller_config:
@@ -14,3 +14,4 @@
         config_path: "{{ configuration_path }}"
         api_name: ap_sys_prof
         data: { "profile-name": "new_ap_sys_profile", "led_mode": { "led_mode": "off"}, "telnet": {} }
+        verify_cert: True
