@@ -31,7 +31,11 @@ SW_PATHS = {'module': 'modules/network/arubaoss',
             'module_utils': 'module_utils/network/arubaoss',
             'plugins_action': 'plugins/action/arubaoss.py',
             }
-CONTROLLER_PATHS = {'module': 'modules/network/arubaos_controller'}
+CONTROLLER_PATHS = {
+    'module': 'modules/network/arubaos',
+    'module_utils': 'module_utils/network/arubaos',
+    'doc_fragments': 'plugins/doc_fragments/arubaos.py'
+}
 CONTROLLER_SSH_PATHS = {'module': 'modules/network/aruba',
                        'plugins_cliconf': 'plugins/cliconf/aruba.py',
                        'plugins_terminal': 'plugins/terminal/aruba.py',
@@ -67,7 +71,8 @@ def define_arguments():
     epilog = ('Directories added:'
               '\n\t- <ansible_module_path>/modules/network/arubaoss'
               '\n\t- <ansible_module_path>/module_utils/network/arubaoss'
-              '\n\t- <ansible_module_path>/modules/network/arubaos_controller'
+              '\n\t- <ansible_module_path>/modules/network/arubaos'
+              '\n\t- <ansible_module_path>/module_utils/network/arubaos'
               '\n\t- <ansible_module_path>/modules/network/aruba_airwave'
               '\n\t- <ansible_module_path>/modules/network/aruba_clearpass'
               '\n\t- <ansible_module_path>/modules/network/aruba_activate'
@@ -81,6 +86,7 @@ def define_arguments():
               '\n\t- <ansible_module_path>/plugins/action/aruba.py'
               '\n\t- <ansible_module_path>/modules/network/aruba/aruba_command.py'
               '\n\t- <ansible_module_path>/modules/network/aruba/aruba_config.py'
+              '\n\t- <ansible_module_path>/plugins/doc_fragments/arubaos.py'
              )
 
     parser = ArgumentParser(description=description,
@@ -247,7 +253,8 @@ def install_wlan_modules(install_package=None):
         <ansible_module_path>/modules/network/aruba_airwave
         <ansible_module_path>/modules/network/aruba_clearpass
         <ansible_module_path>/modules/network/aruba_activate
-        <ansible_module_path>/modules/network/arubaos_controller
+        <ansible_module_path>/modules/network/arubaos
+        <ansible_module_path>/module_utils/network/arubaos
         <ansible_module_path>/modules/network/aruba_instant
 
     Files added/modified:
@@ -297,7 +304,7 @@ def remove_modules():
         <ansible_module_path>/modules/network/aruba_airwave
         <ansible_module_path>/modules/network/aruba_clearpass
         <ansible_module_path>/modules/network/aruba_activate
-        <ansible_module_path>/modules/network/arubaos_controller
+        <ansible_module_path>/modules/network/arubaos
         <ansible_module_path>/modules/network/aruba_instant
 
     Files removed/modified:

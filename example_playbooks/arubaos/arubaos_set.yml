@@ -1,0 +1,76 @@
+---
+- name: "Example playbook for ArubaOS modules"
+  hosts: 127.0.0.1
+  connection: local
+  gather_facts: no
+
+  environment:
+    ANSIBLE_ARUBAOS_HOST: "{{ mm_ip }}"
+    ANSIBLE_ARUBAOS_USERNAME: "{{ mm_username }}"
+    ANSIBLE_ARUBAOS_PASSWORD: "{{ mm_password }}"
+
+  vars:
+    config_path: "/md/branch1/floor1"
+
+  tasks:
+
+    - name: Set single object single instance
+      arubaos_set:
+        config_path: "{{ config_path }}"
+        data:
+          ap_group:             
+            profile-name: "grp-test-ansible"
+
+    - name: Set single object multiple instances
+      arubaos_set:
+        config_path: "{{ config_path }}"
+        data:
+          ap_group: 
+            - profile-name: "grp-test-ansible-1"
+            - profile-name: "grp-test-ansible-2"
+
+    - name: Set multiple object multiple instances
+      arubaos_set:
+        config_path: "{{ config_path }}"
+        data:
+          server_group_prof:
+            - sg_name: "sg_grp-test_ansible-1"
+            - sg_name: "sg_grp-test_ansible-2"
+          ap_group: 
+            - profile-name: "grp-test-ansible-1"
+            - profile-name: "grp-test-ansible-2"
+
+    - name: Multi-part set & commit (commit even if a block fails)
+      arubaos_set:
+        config_path: /md/branch1/building1
+        multipart_data:
+          - server_group_prof:
+              sg_name: srv_group-A
+            aaa_prof:
+              profile-name: aaa_prof-A
+              mba_server_group:
+                srv-group: srv_group-A
+          - server_group_prof:
+              sg_name: srv_group-B
+            aaa_prof:
+              profile-name: aaa_prof-B
+              dot1x_server_group:
+                srv-group: srv_group-B
+
+    - name: Set objects & commit if no errors
+      arubaos_set:
+        config_path: "{{ config_path }}"
+        data:
+          ap_group: 
+            - profile-name: "grp-test-ansible-1"
+            - profile-name: "grp-test-ansible-2"
+        commit: true
+
+    - name: Set objects & commit, continue if errors
+      arubaos_set:
+        config_path: "{{ config_path }}"
+        data:
+          ap_group: 
+            - profile-name: "grp-test-ansible-1"
+            - profile-name: "grp-test-ansible-2"
+        commit_force: true

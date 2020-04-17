@@ -1,0 +1,57 @@
+---
+- name: "Example playbook for ArubaOS modules"
+  hosts: 127.0.0.1
+  connection: local
+  gather_facts: no
+
+  environment:
+    ANSIBLE_ARUBAOS_HOST: "{{ mm_ip }}"
+    ANSIBLE_ARUBAOS_USERNAME: "{{ mm_username }}"
+    ANSIBLE_ARUBAOS_PASSWORD: "{{ mm_password }}"
+
+  vars:
+    config_path: "/md/branch1/floor1"
+
+  tasks:
+
+    - name: Get objects
+      arubaos_get:
+        config_path: "{{ config_path }}"
+        object: ap_group
+
+    - name: Get objects sorted
+      arubaos_get:
+        config_path: "{{ config_path }}"
+        object: ap_group
+        sort: '+profile-name'
+
+    - name: Get objets paginated
+      arubaos_get:
+        config_path: "{{ config_path }}"
+        object: ap_group
+        limit: 2
+        offset: 2
+        total: 10
+
+    - name: Get objects filtered by object type
+      arubaos_get:
+        config_path: "{{ config_path }}"
+        object: ap_group
+        object_filters:
+          - oper: $eq
+            values: ['ap_group.ap_sys_prof', 'ap_group.am_filter_prof']
+
+    - name: Get objectrs filtered by attribute value
+      arubaos_get:
+        config_path: "{{ config_path }}"
+        object: ap_group
+        data_filters:
+          - param_name: 'ap_group.profile-name'
+            oper: $in
+            values: ['default']
+
+    - name: Get objects filtered by configuration state
+      arubaos_get:
+        config_path: "{{ config_path }}"
+        object: ap_group
+        data_types: ['non-default']

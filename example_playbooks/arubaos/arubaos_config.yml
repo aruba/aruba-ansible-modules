@@ -1,0 +1,25 @@
+---
+- name: "Example playbook for ArubaOS modules"
+  hosts: 127.0.0.1
+  connection: local
+  gather_facts: no
+
+  environment:
+    ANSIBLE_ARUBAOS_HOST: "{{ mm_ip }}"
+    ANSIBLE_ARUBAOS_USERNAME: "{{ mm_username }}"
+    ANSIBLE_ARUBAOS_PASSWORD: "{{ mm_password }}"
+
+  vars:
+    config_path: "/md/branch1/floor1"
+
+  tasks:
+
+    - name: Get effective configuration of node 
+      arubaos_config:
+        config_path: "{{ config_path }}"
+      tags: config
+
+    - name: Get local effective configuration of node 
+      arubaos_config:
+        config_path: "{{ config_path }}"
+        type: local
