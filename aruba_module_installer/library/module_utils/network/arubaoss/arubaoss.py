@@ -30,8 +30,9 @@ import re
 
 from ansible.module_utils._text import to_text
 from ansible.module_utils.basic import env_fallback
+from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.network.common.utils import to_list, ComplexList
-from ansible.module_utils.connection import exec_command
+from ansible.module_utils.connection import exec_command, Connection, ConnectionError
 from ansible.module_utils.six import iteritems
 from ansible.module_utils.urls import fetch_url
 from time import sleep
@@ -45,6 +46,7 @@ except ImportError:
 
 
 _DEVICE_CONNECTION = None
+_DEVICE_CONFIGS = {}
 
 arubaoss_provider_spec = {
     'host': dict(),
@@ -189,12 +191,20 @@ def load_params(module):
     return check.get_version()
 
 
-def get_connection(module):
+def get_connection(module, is_cli=False):
     global _DEVICE_CONNECTION
     if not _DEVICE_CONNECTION:
-        load_params(module)
-        conn = Aossapi(module)
-        _DEVICE_CONNECTION = conn
+        if is_cli:
+            if hasattr(module, '_arubaoss_connection'):
+                _DEVICE_CONNECTION = module._arubaoss_connection
+                return module._arubaoss_connection
+            module._arubaoss_connection = Connection(module._socket_path)
+            _DEVICE_CONNECTION = module._arubaoss_connection
+            return module._arubaoss_connection
+        else:
+            load_params(module)
+            conn = Aossapi(module)
+            _DEVICE_CONNECTION = conn
     return _DEVICE_CONNECTION
 
 
@@ -392,6 +402,50 @@ def run_commands(module, commands, *args, **kwargs):
     conn = get_connection(module)
     return conn.run_commands(commands, *args, **kwargs)
 
+def run_cli_commands(module, commands, check_rc=False):
+    conn = get_connection(module, True)
+    try:
+        return conn.run_commands(commands=commands, check_rc=check_rc)
+    except ConnectionError as exc:
+        module.fail_json(msg=to_text(exc))
+
 def get_firmware(module):
     conn = get_connection(module)
     return conn.get_firmware()
+
+def get_cli_config(module, flags=None):
+    '''
+    Obtains the switch configuration
+    '''
+    flags = [] if flags is None else flags
+
+    cmd = 'show running-config '
+    cmd += ' '.join(flags)
+    cmd = cmd.strip()
+
+    try:
+        return _DEVICE_CONFIGS[cmd]
+    except KeyError:
+        rc, out, err = exec_command(module, cmd)
+        if rc != 0:
+            module.fail_json(msg='unable to retrieve current config', stderr=to_text(err, errors='surrogate_then_replace'))
+        cfg = to_text(out, errors='surrogate_then_replace').strip()
+        _DEVICE_CONFIGS[cmd] = cfg
+        return cfg
+
+def load_config(module, commands):
+    '''
+    Loads the configuration onto the switch
+    '''
+    rc, out, err = exec_command(module, 'configure terminal')
+    if rc != 0:
+        module.fail_json(msg='unable to enter configuration mode', err=to_text(out, errors='surrogate_then_replace'))
+
+    for command in to_list(commands):
+        if command == 'end':
+            continue
+        rc, out, err = exec_command(module, command)
+        if rc != 0:
+            module.fail_json(msg=to_text(err, errors='surrogate_then_replace'), command=command, rc=rc)
+
+    exec_command(module, 'end')

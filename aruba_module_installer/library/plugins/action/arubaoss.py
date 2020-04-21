@@ -60,12 +60,6 @@ class ActionModule(_ActionModule):
                         'got %s' % self._play_context.connection)
             else:
                 self._task.args['provider'] = ActionModule.aossapi_implementation(provider, self._play_context)
-        else:
-            return dict(
-                failed=True,
-                msg='invalid connection specified, expected connection=local, '
-                    'got %s' % self._play_context.connection
-            )
 
         result = super(ActionModule, self).run(task_vars=task_vars)
         return result
