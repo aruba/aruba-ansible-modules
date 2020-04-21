@@ -9,10 +9,10 @@
 DOCUMENTATION = """
 ---
 author: Aruba Networks (@ArubaNetworks)
-network_cli: aoscx
-short_description: Use CLI to run commands to CX devices
+network_cli: arubaoss
+short_description: Use CLI to run commands to Switch devices
 description:
-  - This ArubaOSCX plugin provides CLI operations with ArubaOS-CX Devices
+  - This AOS-Switch plugin provides CLI operations with ArubaOS-Switch Devices
 version_added: "2.9"
 """
 
@@ -29,7 +29,7 @@ from ansible.plugins.cliconf import CliconfBase, enable_mode
 
 class Cliconf(CliconfBase):
     '''
-    Cliconf class for AOS-CX
+    Cliconf class for AOS-Switch
     '''
 
     def __init__(self, *args, **kwargs):
