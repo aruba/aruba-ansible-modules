@@ -21,13 +21,18 @@ The aruba_module_installer.py tool installs all files/directories required by An
 
 
 ## How to run this code
-From command line:    
+Clone this repository onto your Linux machine:  
 ```bash
-$ python aruba_module_installer.py
+$ git clone https://github.com/aruba/aruba-ansible-modules.git
+```
+Enter the cloned directory and execute the python installer:  
+```bash
+$ cd aruba-ansible-modules
+$ python aruba_module_installer/aruba_module_installer.py
 ```
 If you receive a permission error, use 'sudo':
 ```bash
-$ sudo python aruba_module_installer.py
+$ sudo python aruba_module_installer/aruba_module_installer.py
 ```
 
 In order to run these scripts, please complete the steps below:
@@ -35,6 +40,17 @@ In order to run these scripts, please complete the steps below:
 
 2. Install Ansible 2.5 or later (refer https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html).
  
+## How to install updates or new modules
+Enter the cloned directory and pull any updates from the repository:  
+```bash
+$ cd aruba-ansible-modules
+$ git pull
+```
+Run the python installer with the `--reinstall` option, remember to use `sudo` if you receive a permission error:
+```bash
+$ sudo python aruba_module_installer/aruba_module_installer.py --reinstall
+```
+
 ## Optional Arguments
 ```
 optional arguments:
@@ -113,7 +129,7 @@ all:
       ansible_connection: local  # REST API connection method
 ```
 
-and the playbook like this (note how the second play, which uses the SSH/CLI module `arubaoss_command`,
+and the playbook like this (note how the second play, which uses the SSH/CLI module `aoscx_command`,
 sets the `ansible_connection` value accordingly):
 
 ```yaml
