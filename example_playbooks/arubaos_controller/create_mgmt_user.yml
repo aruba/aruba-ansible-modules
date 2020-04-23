@@ -14,3 +14,4 @@
         api_name: mgmt_user_cfg_int
         config_path: "{{ configuration_path }}"
         data: { "path": "", "username": "{{ mgmt_username }}", "rolename": "{{ mgmt_userrole }}", "password": "{{ mgmt_userpassword }}" }
+        verify_cert: True

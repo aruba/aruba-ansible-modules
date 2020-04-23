@@ -129,6 +129,15 @@ all:
       ansible_connection: local  # REST API connection method
 ```
 
+# How to Run a Playbook on ArubaOS Controller
+Follow the above steps to install the Aruba's Ansible modules. 
+
+## Prerequisites
+1. Install python request module "pip install requests".
+2. Ensure that the IP address of the Aruba controllers are reachable from your Ansible machine.
+3. Update variables.yml file with required variables like username, IP address and password.
+4. Refer to the module_documentation folder for description of module arguments and example playbooks.
+=======
 and the playbook like this (note how the second play, which uses the SSH/CLI module `aoscx_command`,
 sets the `ansible_connection` value accordingly):
 

@@ -2,13 +2,16 @@
   hosts: localhost
   connection: local
   gather_facts: no
+  vars_files:
+    - variables.yml
   tasks:
     - name: Create a server group and a radius server to it
       arubaos_controller_config:
-        host: <mm-ip>
-        username: <mm-username>
-        password: <mm-password>
-        method: POST
-        config_path: <config_path>
+        host: "{{ mm_ip }}"
+        username: "{{ mm_username }}"
+        password: "{{ mm_password }}"
+        method: "{{ method_type }}"
+        config_path: "{{ configuration_path }}"
         api_name: server_group_prof
         data: { "sg_name":"test", "auth_server": {"name": "test_radius_server"} }
+        verify_cert: True

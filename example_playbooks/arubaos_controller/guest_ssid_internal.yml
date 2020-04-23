@@ -3,7 +3,7 @@
   connection: local
   gather_facts: no
   vars_files:
-    - variables.txt
+    - variables.yml
 
   tasks:
     - name: Create the ssid profile with essid and opmode
@@ -11,107 +11,118 @@
          host: "{{ mm_ip }}"
          username: "{{ mm_username }}"
          password: "{{ mm_password }}"
-         method: POST
+         method: "{{ method_type }}"
+         config_path: "{{ configuration_path }}"
          api_name: ssid_prof
-         config_path: /md
          data: { "profile-name": "ssid-guest-demo", "ssid_enable": {}, "essid": { "essid": "guest-demo"}, "opmode": { "opensystem": true } }
+         verify_cert: True
 
     - name: Create the netdestination for the authenticated clients
       arubaos_controller_config:
          host: "{{ mm_ip }}"
          username: "{{ mm_username }}"
          password: "{{ mm_password }}"
-         method: POST
+         method: "{{ method_type }}"
+         config_path: "{{ configuration_path }}"
          api_name: netdst
-         config_path: /md
          data: { "dstname": "netdst-guest-demo", "netdst__network": [ { "address": "10.0.0.0", "netmask": "255.0.0.0" }, { "address": "192.16.0.0", "netmask": "255.255.0.0" } ] }
+         verify_cert: True
 
     - name: Create the periodic time range
       arubaos_controller_config:
          host: "{{ mm_ip }}"
          username: "{{ mm_username }}"
          password: "{{ mm_password }}"
-         method: POST
+         method: "{{ method_type }}"
+         config_path: "{{ configuration_path }}"
          api_name: time_range_per
-         config_path: /md
          data: { "name": "guest-demo-working-hrs", "time_range_per__day": [ { "day": "Weekday", "StartTime": "07:00", "EndTime": "18:00" } ] }
+         verify_cert: True
 
     - name: Create the policy with session acls and time range
       arubaos_controller_config:
          host: "{{ mm_ip }}"
          username: "{{ mm_username }}"
          password: "{{ mm_password }}"
-         method: POST
+         method: "{{ method_type }}"
+         config_path: "{{ configuration_path }}"
          api_name: acl_sess
-         config_path: /md
          data: { "accname": "acl-guest-demo-time-range", "acl_sess__v4policy": [ { "suser": true, "dany": true, "service-name": "svc-dhcp", "permit": true, "trname": "guest-demo-working-hrs" }, { "suser": true, "dany": true, "service-name": "svc-dns", "permit": true, "trname": "guest-demo-working-hrs" }, { "suser": true, "dstalias": "netdst-guest-demo", "service-any": true, "permit": true, "trname": "guest-demo-working-hrs"}, { "suser": true, "dany": true, "service-name": "svc-http", "permit": true, "trname": "guest-demo-working-hrs" }, { "suser": true, "dany": true, "service-name": "svc-https", "permit": true, "trname": "guest-demo-working-hrs" }, { "suser": true, "dany": true, "service-any": true, "deny": true } ] }
+         verify_cert: True
 
     - name: Create the user role assigned after captive portal authentication
       arubaos_controller_config:
          host: "{{ mm_ip }}"
          username: "{{ mm_username }}"
          password: "{{ mm_password }}"
-         method: POST
+         method: "{{ method_type }}"
+         config_path: "{{ configuration_path }}"
          api_name: role
-         config_path: /md
          data: { "rname": "demo", "role__acl": [ { "acl_type": "session", "pname": "acl-guest-demo-time-range" } ] }
+         verify_cert: True
 
     - name: Create the captive portal authentication profile
       arubaos_controller_config:
          host: "{{ mm_ip }}"
          username: "{{ mm_username }}"
          password: "{{ mm_password }}"
-         method: POST
+         method: "{{ method_type }}"
+         config_path: "{{ configuration_path }}"
          api_name: cp_auth_profile
-         config_path: /md
          data: { "profile-name": "cp-guest-demo", "cp_default_role": { "default-role": "demo" }, "cp_default_guest_role": { "default-guest-role": "demo" }, "cp_server_group": { "server-group": "internal" }, "allow_user": {}, "logout_popup": {}, "cp_proto_http": {} }
+         verify_cert: True
 
     - name: Create the guest logon user role
       arubaos_controller_config:
          host: "{{ mm_ip }}"
          username: "{{ mm_username }}"
          password: "{{ mm_password }}"
-         method: POST
+         method: "{{ method_type }}"
+         config_path: "{{ configuration_path }}"
          api_name: role
-         config_path: /md
          data: { "rname": "usr-guest-demo", "role__acl": [ { "acl_type": "session", "pname": "logon-control" }, { "acl_type": "session", "pname": "captiveportal" }, { "acl_type": "session", "pname": "v6-logon-control" }, { "acl_type": "session", "pname": "captiveportal6" } ], "role__cp": { "cp_profile_name": "cp-guest-demo" } }
+         verify_cert: True
 
     - name: Create the aaa profile
       arubaos_controller_config:
          host: "{{ mm_ip }}"
          username: "{{ mm_username }}"
          password: "{{ mm_password }}"
-         method: POST
+         method: "{{ method_type }}"
+         config_path: "{{ configuration_path }}"
          api_name: aaa_prof
-         config_path: /md
          data: { "profile-name": "aaa-guest-demo", "default_user_role": { "role": "usr-guest-demo" } }
+         verify_cert: True
 
     - name: Create the virtual ap profile
       arubaos_controller_config:
          host: "{{ mm_ip }}"
          username: "{{ mm_username }}"
          password: "{{ mm_password }}"
-         method: POST
+         method: "{{ method_type }}"
+         config_path: "{{ configuration_path }}"
          api_name: virtual_ap
-         config_path: /md
          data: { "profile-name": "vap-guest-demo", "aaa_prof": { "profile-name": "aaa-guest-demo" }, "vlan": { "vlan": "16" }, "ssid_prof": { "profile-name": "ssid-guest-demo" } }
+         verify_cert: True
 
     - name: Create the AP group with virtual AP profile
       arubaos_controller_config:
          host: "{{ mm_ip }}"
          username: "{{ mm_username }}"
          password: "{{ mm_password }}"
-         method: POST
+         method: "{{ method_type }}"
+         config_path: "{{ configuration_path }}"
          api_name: ap_group
-         config_path: /md
          data: { "profile-name": "apgrp-guest-demo", "virtual_ap": [ { "profile-name": "vap-guest-demo" } ] }
+         verify_cert: True
 
     - name: Save Pending Changes / write memory
       arubaos_controller_config:
          host: "{{ mm_ip }}"
          username: "{{ mm_username }}"
          password: "{{ mm_password }}"
-         method: "POST"
+         method: "{{ method_type }}"
+         config_path: "{{ configuration_path }}"
          data: "{}"
          api_name: write_memory
-         config_path: "/md"
+         verify_cert: True
