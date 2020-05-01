@@ -1,0 +1,20 @@
+- name: Create/Update AP syslocation
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_files:
+    - variables.yml
+  tasks:
+    - name: AP syslocation
+      arubainstant_config:
+        host: "{{ virtual_controller_ip }}"
+        username: "{{ virtual_controller_username }}"
+        password: "{{ virtual_controller_password }}"
+        method: POST
+        api_type: configuration
+        api_name: ssid
+        data: { "ssid-profile": { "action": "create", "ssid-profile": "Test_SSID", "essid": { "action": "create", "value": "Test_SSID"}, "type": "employee", "opmode": "wpa2-psk-aes", "wpa-passphrase": "Admin@123" }}
+
+
+
+# This playbook creates a WPA2-PSK based ssid with Network-based access rules of 'deny-all' under "Access" tab. 
