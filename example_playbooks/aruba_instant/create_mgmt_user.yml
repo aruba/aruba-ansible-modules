@@ -1,0 +1,17 @@
+- name: Create a new Management User
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_files:
+    - variables.yml
+  tasks:
+    - name: Management User
+      arubainstant_config:
+        host: "{{ virtual_controller_ip }}"
+        username: "{{ virtual_controller_username }}"
+        password: "{{ virtual_controller_password }}"
+        method: POST
+        api_type: configuration
+        api_name: mgmt-user
+        data: { "mgmt-user" :{ "action": "create", "username": "testuser", "cleartext_password" : "Admin123", "usertype": "read-only" } }
+

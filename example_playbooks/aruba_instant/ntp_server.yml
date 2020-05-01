@@ -1,0 +1,16 @@
+- name: Set NTP server IP
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_files:
+    - variables.yml
+  tasks:
+    - name: NTP IP
+      arubainstant_config:
+        host: "{{ virtual_controller_ip }}"
+        username: "{{ virtual_controller_username }}"
+        password: "{{ virtual_controller_password }}"
+        method: POST
+        api_type: configuration
+        api_name: ntp-server
+        data: { "ntp-server" : { "action" :"create", "ntp_server_ip" : "1.1.1.1" }}

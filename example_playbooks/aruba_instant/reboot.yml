@@ -1,0 +1,18 @@
+- name: Reboot an AP or whole cluster
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_files:
+    - variables.yml
+  tasks:
+    - name: Reboot
+      arubainstant_config:
+        host: "{{ virtual_controller_ip }}"
+        username: "{{ virtual_controller_username }}"
+        password: "{{ virtual_controller_password }}"
+        method: POST
+        api_type: configuration
+        api_name: reboot
+        data: { "iap_ip_addr": "1.1.1.1", "reboot-info" : { "target": "single" }}
+
+#target: "single" or "all"
