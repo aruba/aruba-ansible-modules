@@ -13,4 +13,4 @@
         method: POST
         api_type: action
         api_name: channel
-        data: { "iap_ip_addr" : "<iap-ip-address>", "channel" : { "a-channel" : { "channel_name" : "<channel>", "tx_power" : "<transmit-power-dB>" } } }
+        data: { "iap_ip_addr" : "1.1.1.1", "channel" : { "a-channel" : { "channel_name" : "44", "tx_power" : "18" } } }
