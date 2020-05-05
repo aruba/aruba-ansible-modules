@@ -13,4 +13,4 @@
         method: POST
         api_type: action
         api_name: hostname
-        data: { "iap_ip_addr": "<iap-ip-address>", "hostname_info": { "hostname" : "<change-me>" } }
+        data: { "iap_ip_addr": "1.1.1.1", "hostname_info": { "hostname" : "new-hostname" } }
