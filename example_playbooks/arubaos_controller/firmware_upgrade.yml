@@ -1,0 +1,50 @@
+- name: Upgrade Firmware of a Standalone controller
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_files:
+    - variables.yml
+  tasks:
+    - name: Upgrade firmware
+      arubaos_controller_config:
+        host: 10.3.246.90
+        username: admin
+        password: Aruba@123
+        method: POST
+        api_name: copy_scp_system
+        config_path: /mm
+        data: { "partition_num": "partition1","scphost": "10.10.10.10","username": "admin","filename": "ArubaOS_70xx_8.6.0.0_74441","passwd": "admin123" }
+        verify_cert: True
+
+    - name: Execute a show boot command
+      arubaos_controller_config:
+        host: "{{ mm_ip }}"
+        username: "{{ mm_username }}"
+        password: "{{ mm_password }}"
+        method: "GET"
+        config_path: "{{ configuration_path }}"
+        api_name: showcommand
+        data: { "command": "show boot" }
+        verify_cert: True
+
+    - name: Execute a show image version command
+      arubaos_controller_config:
+        host: "{{ mm_ip }}"
+        username: "{{ mm_username }}"
+        password: "{{ mm_password }}"
+        method: "GET"
+        config_path: "{{ configuration_path }}"
+        api_name: showcommand
+        data: { "command": "show image version" }
+        verify_cert: True
+
+    - name: Reload the Controller
+      arubaos_controller_config:
+        host: "{{ mm_ip }}"
+        username: "{{ mm_username }}"
+        password: "{{ mm_password }}"
+        method: "POST"
+        config_path: /mm
+        api_name: reload
+        data: { "force" : true }
+        verify_cert: True

@@ -2,6 +2,11 @@
 Module: ****arubaoss_file_transfer****  
 Description: "implements rest api's for file transfer from/to device"
 
+##### LIMITATIONS
+* Only HTTP/HTTPS urls are accepted for copying configurations, firmware, and logs  from/to the switch.
+  * Recommended workaround is to use the SSH CLI module for copy commands that involve an SFTP or TFTP server. 
+
+  
 ##### ARGUMENTS
     file_url:
         description:

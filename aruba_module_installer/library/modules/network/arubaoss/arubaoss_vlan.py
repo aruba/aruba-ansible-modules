@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #
-# Copyright (c) 2019 Hewlett Packard Enterprise Development LP
+# Copyright (c) 2019-2020 Hewlett Packard Enterprise Development LP
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ options:
     command:
         description: Name of sub module, according to the configuration required.
         choices: config_vlan, config_vlan_port,
-                config_vlan_ipaddress, config_vlan_dhcpHelperAddress
+                config_vlan_ipaddress, config_vlan_dhcpHelperAddress, config_vlan_igmp
         required: True
     config:
         description: To config or unconfig the required command
@@ -112,6 +112,34 @@ options:
         description: Direction is which acl to be applied
         choices: AD_INBOUND, AD_OUTPUND, AD_CRF
         required: false
+    is_igmp_enabled:
+        description:  Enable/disable/configure Internet Group Management Protocol (IGMP) feature on a VLAN.
+        required: false
+        default: false
+    last_member_query_interval
+        description:  IGMP last member query interval. Value will be ignored if is_igmp_enabled is false.
+        required: false
+        default: 1 [1-2]
+    query_max_response_time
+        description:  Set the time interval in seconds to wait for a response to a query 
+        required: false
+        default: 10 [10-128]
+    robustness
+        description:  Set the number of times to retry a query
+        required: false
+        default: 2 [1-8]
+    igmp_version
+        description:  Set the IGMP version to use
+        required: false
+        default: 2 [2-3]
+    is_querier_enabled
+        description:  Specify querier/non-querier capability for the VLAN.
+        required: false
+        default: true
+    interval
+        description:  Sets the interval in seconds between IGMP queries
+        required: false
+        default: 125 [5-300]
 
 
 author:
@@ -132,11 +160,30 @@ EXAMPLES = '''
          is_management_vlan: false
          config: "create"
          command: config_vlan
+
+      - name: Configure igmp and its parameters for VLAN 2
+        arubaoss_vlan:
+          vlan_id: 2
+          command: config_vlan_igmp
+          is_igmp_enabled: true
+          last_member_query_interval: 2
+          query_max_response_time: 20
+          robustness: 4
+          igmp_version: 2
+          is_querier_enabled: true
+          interval: 145
+
+      - name: delete igmp for VLAN 2
+        arubaoss_vlan:
+          vlan_id: 2
+          command: config_vlan_igmp
+          is_igmp_enabled: false
 '''
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.network.arubaoss.arubaoss import run_commands
 from ansible.module_utils.network.arubaoss.arubaoss import get_config
+from ansible.module_utils.network.arubaoss.arubaoss import get_firmware
 from ansible.module_utils.network.arubaoss.arubaoss import arubaoss_argument_spec
 from ansible.module_utils._text import to_text
 import json
@@ -366,10 +413,8 @@ def config_vlan(module):
     data['is_voice_enabled'] = params['is_voice_enabled']
     data['is_dsnoop_enabled'] = params['is_dsnoop_enabled']
 
-    firmware_url = "/system/status"
-    check_firmware_version = get_config(module, firmware_url)
-    dhcp_server = module.from_json(to_text(check_firmware_version))
-    if (dhcp_server['firmware_version'][:2] == "YA") or (dhcp_server['firmware_version'][:2] == "YB"):
+    firmware = get_firmware(module)
+    if (firmware[:2] == "YA") or (firmware[:2] == "YB"):
         if params['is_dhcp_server_enabled']:
             return {'msg': "option : is_dhcp_server_enabled is not supported on this platform",
                     'changed': False, 'failed': True}
@@ -488,6 +533,42 @@ def config_acl(module):
 
     return result
 
+"""
+-------
+Name: config_igmp
+
+Configures igmp for VLAN
+
+param request: module
+
+Returns
+ Configure the switch with params sent
+-------
+"""
+def config_igmp(module):
+    params = module.params
+
+    # Parameters
+    if params['vlan_id'] == "":
+        return {'msg': "vlan_id cannot be null",
+                'changed': False, 'failed': True}
+    else:
+        data = {'vlan_id': params['vlan_id']}
+
+    data['is_igmp_enabled'] = params['is_igmp_enabled']
+    data['last_member_query_interval'] = params['last_member_query_interval']
+    data['query_max_response_time'] = params['query_max_response_time']
+    data['robustness'] = params['robustness']
+    data['version'] = params['igmp_version']
+    data['querier'] = {
+            'is_querier_enabled': params['is_querier_enabled'],
+            'interval': params['interval']
+    }
+
+    method = 'PUT'
+    url = "/vlans/" + str(params['vlan_id']) + '/igmp'
+    result = run_commands(module, url, data, method)
+    return result
 
 """
 -------
@@ -504,7 +585,7 @@ def run_module():
         command=dict(type='str', default='config_vlan',
                choices=['config_vlan', 'config_vlan_port',
                 'config_vlan_ipaddress', 'config_vlan_dhcpHelperAddress',
-                'config_vlan_qos','config_vlan_acl']),
+                'config_vlan_qos','config_vlan_acl', 'config_vlan_igmp']),
         config=dict(type='str', required=False, default= "create",
                choices=["create","delete"]),
         vlan_id=dict(type='int', required=True),
@@ -534,6 +615,13 @@ def run_module():
             choices=['AT_STANDARD_IPV4','AT_EXTENDED_IPV4','AT_CONNECTION_RATE_FILTER']),
         acl_direction=dict(type='str', required=False, choices=['AD_INBOUND',
             'AD_OUTBOUND','AD_CRF']),
+        is_igmp_enabled=dict(type='bool', required=False, default=False),
+        last_member_query_interval=dict(type='int', required=False, default=1),
+        query_max_response_time=dict(type='int', required=False, default=10),
+        robustness=dict(type='int', required=False, default=2),
+        igmp_version=dict(type='int', required=False, default=2),
+        is_querier_enabled=dict(type='bool', required=False, default=True),
+        interval=dict(type='int', required=False, default=125),
     )
 
     module_args.update(arubaoss_argument_spec)
@@ -559,6 +647,8 @@ def run_module():
             result = config_qos(module)
         elif module.params['command'] == 'config_vlan_acl':
             result = config_acl(module)
+        elif module.params['command'] == 'config_vlan_igmp':
+            result = config_igmp(module)
         else:
             result = config_vlan_ipaddress(module)
     except Exception as err:

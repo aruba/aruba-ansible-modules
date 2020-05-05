@@ -31,10 +31,10 @@ Description: "This module implements REST API based configuration(GET/POST) for 
         description: Payload data for the mentioned API endpoint
         type: dict
         required: false        
-    validate_certs:
-        description: set to True, to enable server certificate validation. By default certificate validation is disabled.
+    verify_cert:
+        description: set to True, to enable server certificate validation. By default certificate validation is enabled.
         type: bool
-        required: false
+        required: true
     client_cert:
         description: set the file path, to supply client cert to server for validation. By default client certificate validation is disabled.
         type: string
@@ -55,6 +55,7 @@ Description: "This module implements REST API based configuration(GET/POST) for 
         config_path: "{{ configuration_path }}"
         api_name: vlan_id
         data: { "id": 47 }
+        verify_cert: True
         
     - name: Execute a show version command
       arubaos_controller_config:
@@ -65,6 +66,6 @@ Description: "This module implements REST API based configuration(GET/POST) for 
         config_path: "{{ configuration_path }}"
         api_name: showcommand
         data: { "command": "show version" }
-        validate_certs: True
+        verify_cert: True
 ```
 

@@ -1,4 +1,20 @@
 #!/usr/bin/python
+#
+# Copyright (c) 2019-2020 Hewlett Packard Enterprise Development LP
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
 
 ANSIBLE_METADATA = {'metadata_version': '1.1',
                     'status': ['preview'],
@@ -22,6 +38,10 @@ options:
         description:
             - Password used to login to the Mobility Master
         required: false
+    session_token:
+        description:
+            - Session Token string can be used instead of login using credentials
+        required: False
     method:
         description:
             - HTTP Method to be used for the API call
@@ -41,16 +61,20 @@ options:
         description:
             - dictionary data for the API call
         required: false
-    validate_certs:
+    verify_cert:
         description:
-            - (Optional) set to True to validate server SSL certificate upon HTTPS connection. Default option is false
-        required: false
+            - (Optional) Path to ca_cert. Defaults to "true" for installed certs. Set to "false" to prevent SSL cert check.
+        choices:
+            - /path/to/cert
+            - false
+            - true
+        required: False
     client_cert:
-        description: 
-            - (Optional) set the file path for client certificate validation from server side. Default option is None. 
+        description:
+            - (Optional) set the file path for client certificate validation from server side. Default option is None.
         required: false
     client_key:
-        description: 
+        description:
             - (Optional) if the client_cert did not have the key, use this parameter. Default option is None.
         required: false
 """
@@ -65,7 +89,7 @@ EXAMPLES = """
         api_name: ssid_prof
         config_path: /md/branch1/building1
         data: { "profile-name": "test_ssid_profile", "essid" :{"essid":"test_employee_ssid"}, "opmode": {"name": "wpa-aes"}}
-        validate_cert: True
+
 
     - name: Configure a server group profile and add an existing radius server to it
       arubaos_controller_config:
@@ -82,6 +106,8 @@ from ansible.module_utils.basic import *
 import json
 from ansible.module_utils.urls import open_url
 import ansible.module_utils.six.moves.http_cookiejar as cookiejar
+import requests
+
 try:
     from urllib.parse import urlencode
 except ImportError:
@@ -98,10 +124,14 @@ def login_api_mm(module):
     url = "https://" + str(host) + ":4343/v1/api/login"
     headers = {'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded'}
     data = urlencode({'username': username, 'password': password})
-    cookies = cookiejar.LWPCookieJar()
-    validate_certs = module.params.get('validate_certs')
+    global cookies
     client_cert = module.params.get('client_cert')
     client_key = module.params.get('client_key')
+    verify_cert = module.params.get('verify_cert')
+    if verify_cert.lower() == "false":
+        verify_cert = False
+    elif verify_cert.lower() == "true":
+        verify_cert = True
     http_agent = 'ansible-httpget'
     follow_redirects = 'urllib2'
     method = "POST"
@@ -110,10 +140,10 @@ def login_api_mm(module):
     module.api_call['url'] = url
 
     try:
-        resp = open_url(url, data=data, headers=headers, method=method, validate_certs=validate_certs,
-                        http_agent=http_agent, follow_redirects=follow_redirects, cookies=cookies,
-                        client_cert=client_cert, client_key=client_key)
-        resp = resp.read()
+        resp = requests.post(url, data=data, headers=headers, verify=verify_cert,
+			                cert=(client_cert, client_key))
+        cookies = resp.cookies
+        resp = resp.text
         result = json.loads(resp)['_global_result']
         if result['status'] == "0":
             session_key = result['UIDARUBA']
@@ -130,22 +160,37 @@ def login_api_mm(module):
                    'session_token': session_key}
     return session_dict
 
+def logout(module, session_token):
+    host = module.params.get('host')
+    url = "https://" + str(host) + ":4343/v1/api/logout"
+    headers = {'Accept': 'application/json', 'Cookie': 'SESSION=' + str(session_token)}
+    client_cert = module.params.get('client_cert')
+    client_key = module.params.get('client_key')
+    verify_cert = module.params.get('verify_cert')
+    if verify_cert.lower() == "false":
+        verify_cert = False
+    elif verify_cert.lower() == "true":
+        verify_cert = True
+    return requests.get(url, headers=headers, verify=verify_cert,
+                    cookies=cookies,
+                    cert=(client_cert, client_key))
+
 def mm_api_call(module, session):
     host = module.params.get('host', session['host'])
     username = module.params.get('username')
     password = module.params.get('password')
-    #session_token =  module.params.get('session_token')
     method = module.params.get('method')
     api_name = module.params.get('api_name')
     config_path = module.params.get('config_path')
     data = module.params.get('data')
-    cookies = cookiejar.LWPCookieJar()
     resp = ""
-    validate_certs = module.params.get('validate_certs')
     client_cert = module.params.get('client_cert')
     client_key = module.params.get('client_key')
-    http_agent = 'ansible-httpget'
-    follow_redirects = 'urllib2'
+    verify_cert = module.params.get('verify_cert')
+    if verify_cert.lower() == "false":
+        verify_cert = False
+    elif verify_cert.lower() == "true":
+        verify_cert = True
     session_token = session['session_token']
     if not host:
         host = session['host']
@@ -168,43 +213,54 @@ def mm_api_call(module, session):
             if api_name == "showcommand":
                 params = {"command": data["command"], "UIDARUBA": str(session_token)}
                 url = "https://" + str(host) + ":4343/v1/configuration/" + str(api_name) + "?" + urlencode(params)
-            resp = open_url(url, headers=headers, method=method, validate_certs=validate_certs,
-                            http_agent=http_agent, follow_redirects=follow_redirects, cookies=cookies,
-                            client_cert=client_cert, client_key=client_key)
+            resp = requests.get(url, headers=headers, verify=verify_cert,
+                            cookies=cookies, cert=(client_cert, client_key))
+
         else: # method is POST
             headers = {'Accept': 'application/json', 'Content-Type': 'application/json',
                        'Cookie': 'SESSION=' + str(session_token)}
 
             data = json.dumps(data) #converts python object to json string that is readable by Ansible
 
-            resp =  open_url(url, data=data, headers=headers, method=method, validate_certs=validate_certs,
-                             http_agent=http_agent, follow_redirects=follow_redirects, cookies=cookies,
-                             client_cert=client_cert, client_key=client_key)
+            resp =  requests.post(url, data=data, headers=headers, verify=verify_cert,
+                             cookies=cookies, cert=(client_cert, client_key))
 
-        result = json.loads(resp.read())
+        if resp.text == "" and resp.status_code == 200:
+            logout(module, session_token)
+            module.exit_json(changed=False, msg="Success", status_code=resp.status_code)
+        elif resp.text == "" :
+            raise Exception("API call failed with status code %d" % int(resp.status_code))
+        result = json.loads(resp.text)
 
         if method == "POST":
             # Result will contain "Error" key if the request was made with wrong api name and data
             if "Error" in result.keys():
+                logout(module, session_token)
                 module.fail_json(changed=False, msg="API Call failed! Check api name and data", reason=result['Error'], api_call=module.api_call)
 
             result = result['_global_result']
             if result['status'] == 0:
-                module.exit_json(changed=True, msg=str(result['status_str']), status_code=int(resp.code))
-            # Skip if result status is either 2 and 1. Example trying to delete something that do not exist will return such status 
+                logout(module, session_token)
+                module.exit_json(changed=True, msg=str(result['status_str']), status_code=int(resp.status_code))
+            # Skip if result status is either 2 and 1. Example trying to delete something that do not exist will return such status
             elif result['status'] == 2 or result['status'] == 1:
-                module.exit_json(skipped=True, msg=str(result['status_str']), status_code=int(resp.code))
+                logout(module, session_token)
+                module.exit_json(skipped=True, msg=str(result['status_str']), status_code=int(resp.status_code))
             else:
+                logout(module, session_token)
                 module.fail_json(changed=False, msg="API Call failed!", reason=result['status_str'], api_call=module.api_call)
         # if method is GET
         else:
-            if resp.code == 200:
-                module.exit_json(changed=False, msg=result['_data'], status_code=resp.code, response=result)
+            if resp.status_code == 200:
+                logout(module, session_token)
+                module.exit_json(changed=False, msg=result['_data'], status_code=resp.status_code, response=result)
             else:
-                raise Exception("API call failed with status code %d" % int(resp.code))
+                logout(module, session_token)
+                raise Exception("API call failed with status code %d" % int(resp.status_code))
 
     except Exception as e:
-        module.fail_json(changed=False, msg="API Call failed! Exception during api call",
+        logout(module, session_token)
+        module.fail_json(changed=False, msg=resp.status_code,
                          reason=str(e), api_call=module.api_call)
 
 def main():
@@ -212,18 +268,20 @@ def main():
         argument_spec=dict(
             host=dict(required=False, type='str'),
             username=dict(required=False, type='str'),
-            password=dict(required=False, type='str'),
+            password=dict(required=False, type='str', no_log=True),
             api_name=dict(required=True, type='str'),
             method=dict(required=True, type='str', choices=['GET', 'POST']),
             config_path=dict(required=False, type='str'),
             data=dict(required=False, type='dict'),
-            validate_certs=dict(required=False, type="bool", default=False),
             client_cert=dict(required=False, type="str", default=None),
-            client_key=dict(required=False, type="str", default=None)
+            client_key=dict(required=False, type="str", default=None),
+            verify_cert=dict(required=False, type="str", default=True),
+            session_token=dict(required=False, type="str", default=None, no_log=True)
         ))
     session = None
+    session_token =  module.params.get('session_token')
     # If session_token is not provided as module argument, call to generate the session_token
-    if not session or 'session_token' not in session.keys():
+    if not session_token:
         ### Check if username, password, host is present in module args
         host = module.params.get('host')
         username = module.params.get('username')
@@ -232,6 +290,9 @@ def main():
             session = login_api_mm(module)
         else:
             module.fail_json(changed=False, msg="Check if host, username and password are provided. Else generate session dict using arubaos session ansible module")
+    elif session_token:
+        session = {'host': module.params.get('host'),
+                   'session_token': session_token}
     # Check if the sesstion token is present and call to POST/GET REST API commands
     #if session_token is not '' and session_token:
     if session and 'session_token' in session.keys():
@@ -241,4 +302,5 @@ def main():
 
 
 if __name__ == '__main__':
+    cookies = ""
     main()
