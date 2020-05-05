@@ -1,14 +1,16 @@
-- name: Show existing network
+- name: Show network as a show command through API
   hosts: localhost
   connection: local
   gather_facts: no
+  vars_files:
+    - variables.yml
   tasks:
-    - name: Show existing network as a show command through API
+    - name: Show network
       arubainstant_config:
-        host: <virtual-controller-ip>
-        username: <virtual-controller-username>
-        password: <virtual-controller-password>
+        host: "{{ virtual_controller_ip }}"
+        username: "{{ virtual_controller_username }}"
+        password: "{{ virtual_controller_password }}"
         method: GET
-        iap_ip_addr: <iap-ip-address>
+        iap_ip_addr: 1.1.1.1
         api_type: monitoring
         api_name: show network
