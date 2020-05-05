@@ -1,0 +1,16 @@
+- name: Show IAP firmware version as a show command through API
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_files:
+    - variables.yml
+  tasks:
+    - name: Show IAP firmware version
+      arubainstant_config:
+        host: "{{ virtual_controller_ip }}"
+        username: "{{ virtual_controller_username }}"
+        password: "{{ virtual_controller_password }}"
+        method: GET
+        iap_ip_addr: 1.1.1.1
+        api_type: monitoring
+        api_name: show version
