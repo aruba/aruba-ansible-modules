@@ -1,0 +1,20 @@
+- name: Add Zone
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_files:
+    - variables.yml
+  tasks:
+    - name: Configure zone on an Instant AP
+      arubainstant_config:
+        host: "{{ virtual_controller_ip }}"
+        username: "{{ virtual_controller_username }}"
+        password: "{{ virtual_controller_password }}"
+        method: POST
+        api_type: action
+        api_name: zone
+        data: { "iap_ip_addr" : "<iap-ip-address>", "zone_info" : { "action" : "create", "zonename" : "<change-me>" } }
+
+
+
+# python arubainstant_config.py '{"ANSIBLE_MODULE_ARGS":{"host":"10.70.172.250", "username":"admin", "password":"Aruba1234", "method":"POST", "api_type":"action" ,"api_name":"hostname", "data":{ "iap_ip_addr" : "10.70.172.251", "hostname_info" : { "hostname" : "slave-AP:ae:16" } } }}'
