@@ -2,13 +2,16 @@
   hosts: localhost
   connection: local
   gather_facts: no
+  vars_files:
+    - variables.yml
   tasks:
     - name: Create a aaa prof
       arubaos_controller_config:
-        host: <mm-ip>
-        username: <mm-username>
-        password: <mm-password>
-        method: POST
-        config_path: <config_path>
+        host: "{{ mm_ip }}"
+        username: "{{ mm_username }}"
+        password: "{{ mm_password }}"
+        method: "{{ method_type }}"
+        config_path: "{{ configuration_path }}"
         api_name: aaa_prof
         data: { "profile-name": "test_dot1x", "auth_profile": {"profile-name" : "test_dot1x"}, "dot1x_server_group": {"srv-group": "test_dot1x"}, "download_role": {} }
+        verify_cert: True

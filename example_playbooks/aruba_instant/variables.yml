@@ -1,0 +1,4 @@
+virtual_controller_ip: <vc-ip>
+virtual_controller_username: <vc-username>
+virtual_controller_password: <vc-password>
+
