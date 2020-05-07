@@ -107,8 +107,6 @@ EXAMPLES = """
 """
 from ansible.module_utils.basic import *
 import json
-import re
-import sys
 from ansible.module_utils.urls import open_url
 import ansible.module_utils.six.moves.http_cookiejar as cookiejar
 
