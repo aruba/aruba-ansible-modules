@@ -1,0 +1,16 @@
+- name: Change static channel and power
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_files:
+    - variables.yml
+  tasks:
+    - name: Change the channel power for a-channel (5GHz)
+      arubainstant_config:
+        host: "{{ virtual_controller_ip }}"
+        username: "{{ virtual_controller_username }}"
+        password: "{{ virtual_controller_password }}"
+        method: POST
+        api_type: action
+        api_name: channel
+        data: { "iap_ip_addr" : "1.1.1.1", "channel" : { "a-channel" : { "channel_name" : "44", "tx_power" : "18" } } }
