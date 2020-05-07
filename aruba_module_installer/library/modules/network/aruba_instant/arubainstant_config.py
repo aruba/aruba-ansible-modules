@@ -187,11 +187,21 @@ def mm_api_call(module, session):
         data = json.dumps(data) #converts python object to json string that is readable by Ansible
         resp =  open_url(url, data = data, headers=headers, method=method, validate_certs=validate_certs, http_agent=http_agent, follow_redirects=follow_redirects, cookies=cookies)
         result = json.loads(resp.read())
+        changed=True
 
-        if result['Status'] == 'Success':
-            module.exit_json(changed=True, msg=str(result), status_code=int(resp.code))
+        try:
+            status = result['message']
+        except KeyError:
+            status = result['Status']
+
+        if api_type == 'monitoring':
+            changed = False
+            result = result['Command output']
+
+        if status == 'Success':
+            module.exit_json(changed=changed, response_code=int(resp.code), response=str(result))
         else:
-            module.fail_json(changed=False, msg="API Call failed!", reason=result['status_str'], api_call=module.api_call)
+            module.fail_json(changed=False, msg="API Call failed!", reason=str(result), api_call=module.api_call)
 
     except Exception as e:
         module.fail_json(changed=False, msg="API Call failed! Exception during api call",
