@@ -6,7 +6,7 @@ ANSIBLE_METADATA = {'metadata_version': '1.1',
 
 DOCUMENTATION = """
 ---
-module: arubaiap_config
+module: arubainstant_config
 version_added: 0.1
 short_description: Configures and monitors IAP in either master, slave or standalone mode using APIs
 options:
@@ -57,7 +57,7 @@ options:
 EXAMPLES = """
 #Usage Examples
     - name: Change the hostname of a particular IAP
-      iap_config:
+      arubainstant_config:
         host: 1.1.1.1
         username: admin
         password: aruba123
@@ -67,15 +67,15 @@ EXAMPLES = """
         data: { "iap_ip_addr": "2.2.2.2", "hostname_info": {"hostname": "iap-floor1-building1"}}
 
     - name: Change the hostname of a particular IAP
-      arubaiap_config:
-        session: {{ session_dict.msg }}
+      arubainstant_config:
+        session: {{ session_dict.msg }} #used when previous play's output is registered
         method: POST
         api_type: action
         api_name: hostname
         data: { "iap_ip_addr": "2.2.2.2", "hostname_info": {"hostname": "iap-floor1-building1"}}
 
     - name: Configure a Management User
-      arubaiap_config:
+      arubainstant_config:
         host: 1.1.1.1
         username: admin
         password: admin123
@@ -84,18 +84,31 @@ EXAMPLES = """
         api_name: mgmt-user
         data: {"action" : "create","username" : "admin-new", "cleartext_password" : "aruba123", "usertype" : "guest-mgmt"}}
 
-    - name: Show a existing network
-      arubaiap_config:
+    - name: Show existing network as a show command through API
+      arubainstant_config:
         host: 1.1.1.1
         username: admin
         password: admin123
         method: GET
+        iap_ip_addr: 1.1.1.2
         api_type: monitoring
         api_name: show network
+
+    - name: Show firmware version
+      arubainstant_config:
+        host: 1.1.1.1
+        username: admin
+        password: admin123
+        method: GET
+        iap_ip_addr: 1.1.1.2
+        api_type: monitoring
+        api_name: show version
 
 """
 from ansible.module_utils.basic import *
 import json
+import re
+import sys
 from ansible.module_utils.urls import open_url
 import ansible.module_utils.six.moves.http_cookiejar as cookiejar
 
@@ -133,7 +146,7 @@ def login_api_mm(module):
         if result['Status'] == "Success":
             session_key = result['sid']
         else:
-            module.fail_json(changed=False, msg="Login Failed! Recheck the credentials you provided", reason=str(result), api_call=module.api_call, response="content: " + str(resp) + " login status code: " + str(result['status']) + " login error: " + str(result['status_str']))
+            module.fail_json(changed=False, msg="Login Failed! Check the credentials you provided", reason=str(result), api_call=module.api_call, response="content: " + str(resp) + " login status code: " + str(result['status']) + " login error: " + str(result['status_str']))
 
     except Exception as e:
         module.fail_json(changed=False, msg="API Call failed! Exception during login", reason=str(e), api_call=module.api_call)
@@ -142,7 +155,7 @@ def login_api_mm(module):
                    'session_token': session_key}
     return session_dict
 
-def mm_api_call(module, session):
+def iap_api_call(module, session):
     host = module.params.get('host', session['host'])
     username = module.params.get('username')
     password = module.params.get('password')
@@ -237,7 +250,7 @@ def main():
 
     # Check if the sesstion token is present and call to POST/GET REST API commands
     if session and 'session_token' in session.keys():
-        mm_api_call(module, session)
+        iap_api_call(module, session)
     else:
         module.fail_json(changed=False, msg="Unable to create the session token")
 
