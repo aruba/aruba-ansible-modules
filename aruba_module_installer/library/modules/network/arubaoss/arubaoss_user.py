@@ -34,6 +34,9 @@ description:
     - "This implement rest api's which can be use to manage and configure
        user on the device. Can configure only operator role via REST"
 
+extends_documentation_fragment:
+    - arubaoss
+
 options:
     user_name:
         description:

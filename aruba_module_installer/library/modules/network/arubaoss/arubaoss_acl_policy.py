@@ -33,6 +33,9 @@ description:
     - "This implements rest api's which will configure acl policies
        standard and extended onto device"
 
+extends_documentation_fragment:
+    - arubaoss
+    
 options:
   acl_name:
     description:

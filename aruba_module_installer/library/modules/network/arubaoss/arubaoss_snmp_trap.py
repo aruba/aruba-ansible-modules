@@ -33,6 +33,9 @@ description:
     - "This implements rest api's which enable/disable snmp traps for
        differente features on device"
 
+extends_documentation_fragment:
+    - arubaoss
+
 options:
     arp_protect:
         description:

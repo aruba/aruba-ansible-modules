@@ -23,6 +23,8 @@ short_description: Logs in and executes configuration commands on AOS-Switch dev
 description:
   - This module allows configuration of running-configs on AOS-Switch devices via SSH connection
 author: Aruba Networks (@ArubaNetworks)
+extends_documentation_fragment:
+    - arubaoss
 options:
   lines:
     description:

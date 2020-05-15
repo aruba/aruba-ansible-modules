@@ -32,6 +32,9 @@ version_added: "2.4"
 description:
     - "This implements static routing rest api and global routing configuration"
 
+extends_documentation_fragment:
+    - arubaoss
+
 options:
     ip_route_mode:
         description:

@@ -37,6 +37,9 @@ description:
        use arubaoss_reboot to bringup device with that flash, thus
        provides firmware-upgrade"
 
+extends_documentation_fragment:
+    - arubaoss
+
 options:
     file_url:
         description:

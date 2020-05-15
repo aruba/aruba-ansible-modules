@@ -32,6 +32,9 @@ version_added: "2.6"
 description:
     - "This implements rest api's which configure ip autorization on device"
 
+extends_documentation_fragment:
+    - arubaoss
+
 options:
     auth_ip:
         description:

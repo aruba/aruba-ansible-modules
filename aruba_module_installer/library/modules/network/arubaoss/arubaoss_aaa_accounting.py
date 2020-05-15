@@ -32,6 +32,9 @@ version_added: "2.4"
 description:
     - "This implements rest apis which can be used to configure AAA Accounting"
 
+extends_documentation_fragment:
+    - arubaoss
+
 options:
     cmd_accounting_method
         description: Method for commands Accounting Configuration

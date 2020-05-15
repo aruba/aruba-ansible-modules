@@ -32,6 +32,9 @@ version_added: "2.4"
 description:
     - "This implements rest apis which can be used to configure TACACS Server"
 
+extends_documentation_fragment:
+    - arubaoss
+
 options:
   command:
     description: Function name calls according to configuration required.
