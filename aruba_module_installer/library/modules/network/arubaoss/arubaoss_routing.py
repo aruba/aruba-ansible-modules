@@ -32,6 +32,9 @@ version_added: "2.6"
 description:
     - "This implements routing rest api to enable/disable routing on device"
 
+extends_documentation_fragment:
+    - arubaoss
+
 options:
     state:
         description:

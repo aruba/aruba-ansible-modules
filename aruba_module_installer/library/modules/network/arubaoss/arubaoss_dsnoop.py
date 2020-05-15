@@ -32,6 +32,9 @@ version_added: "2.4"
 description:
     - "This implements REST APIs which can be used to configure DHCP snooping"
 
+extends_documentation_fragment:
+    - arubaoss
+
 options:
     command:
         description: To configure a specific feature on DHCP snooping

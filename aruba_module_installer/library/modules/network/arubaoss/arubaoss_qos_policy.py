@@ -33,6 +33,9 @@ description:
     - "This implements rest api's which can be used to configure qos
        on device."
 
+extends_documentation_fragment:
+    - arubaoss
+
 options:
     class_name:
         description:

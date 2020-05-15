@@ -33,6 +33,9 @@ description:
     - "This implement rest api's which can be used to configure captive portal
        on devices"
 
+extends_documentation_fragment:
+    - arubaoss
+    
 options:
     profile_name:
         description:

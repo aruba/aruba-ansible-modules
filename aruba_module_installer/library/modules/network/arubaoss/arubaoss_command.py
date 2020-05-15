@@ -22,6 +22,8 @@ short_description: Logs in and executes CLI commands on AOS-Switch device via SS
 description:
   - This module allows execution of CLI commands on AOS-Switch devices via SSH connection
 author: Aruba Networks (@ArubaNetworks)
+extends_documentation_fragment:
+    - arubaoss
 options:
   commands:
     description: List of commands to be executed in sequence on the switch. Every command

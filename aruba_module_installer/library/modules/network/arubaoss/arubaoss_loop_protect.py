@@ -32,6 +32,9 @@ version_added: "2.6"
 description:
     - "This configures loop protect on device over vlan or port"
 
+extends_documentation_fragment:
+    - arubaoss
+
 options:
     command:
         description:

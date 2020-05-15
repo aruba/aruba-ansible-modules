@@ -34,6 +34,9 @@ description:
        User has an option to disable the wait and just send
        the reboot to device"
 
+extends_documentation_fragment:
+    - arubaoss
+
 options:
     boot_image:
         description:

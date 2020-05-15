@@ -32,6 +32,9 @@ version_added: "2.4"
 description:
     - "This implements rest apiis whcih can be used to configure ports"
 
+extends_documentation_fragment:
+    - arubaoss
+
 options:
     class_name:
         description:

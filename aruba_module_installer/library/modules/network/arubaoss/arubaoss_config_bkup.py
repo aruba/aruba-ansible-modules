@@ -36,6 +36,9 @@ description:
        task. Defualt module action is to restore the configuration.
        Use config_type for configuration backup"
 
+extends_documentation_fragment:
+    - arubaoss
+    
 options:
     filne_name:
         description:

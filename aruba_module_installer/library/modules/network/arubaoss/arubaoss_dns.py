@@ -32,6 +32,9 @@ version_added: "2.4"
 description:
     - "This implements rest apis which can be used to configure DNS"
 
+extends_documentation_fragment:
+    - arubaoss
+    
 options:
     dns_config_mode:
         description: DNS Configuration Mode, default is DCM_DHCP
