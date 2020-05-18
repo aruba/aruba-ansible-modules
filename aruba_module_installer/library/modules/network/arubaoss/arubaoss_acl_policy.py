@@ -307,7 +307,7 @@ def acl(module):
     else:
         # Check if acl is applied to any port
         port_url = '/ports-access-groups'
-    	port_acl = get_config(module, port_url)
+        port_acl = get_config(module, port_url)
         if port_acl:
             check_config = module.from_json(to_text(port_acl))
 
@@ -354,7 +354,7 @@ def check_acl_rule_exists(module):
             if ele['acl_action'] != params['acl_action']:
                 continue
             if params['acl_type'] == 'AT_EXTENDED_IPV4':
-		print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                 protocol_type = ele['traffic_match']['protocol_type']
                 source_ip_address = ele['traffic_match']['source_ip_address']['octets']
                 source_ip_mask = ele['traffic_match']['source_ip_mask']['octets']
