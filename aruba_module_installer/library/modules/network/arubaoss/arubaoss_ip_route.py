@@ -33,7 +33,7 @@ description:
     - "This implements static routing rest api and global routing configuration"
 
 extends_documentation_fragment:
-    - arubaoss
+    - arubaoss_rest
 
 options:
     ip_route_mode:
@@ -151,7 +151,7 @@ EXAMPLES = '''
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.network.arubaoss.arubaoss import run_commands,get_config
-from ansible.module_utils.network.arubaoss.arubaoss import arubaoss_argument_spec
+from ansible.module_utils.network.arubaoss.arubaoss import arubaoss_argument_spec, arubaoss_required_if
 from ansible.module_utils._text import to_text
 
 
@@ -251,6 +251,7 @@ def run_module():
     result = dict(changed=False,warnings='Not Supported')
 
     module = AnsibleModule(
+        required_if=arubaoss_required_if,
         argument_spec=module_args,
         supports_check_mode=True
     )

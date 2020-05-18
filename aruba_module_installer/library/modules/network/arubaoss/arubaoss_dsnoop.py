@@ -33,7 +33,7 @@ description:
     - "This implements REST APIs which can be used to configure DHCP snooping"
 
 extends_documentation_fragment:
-    - arubaoss
+    - arubaoss_rest
 
 options:
     command:
@@ -226,6 +226,7 @@ def run_module():
     result = dict(changed=False, warnings='Not Supported')
 
     module = AnsibleModule(
+        required_if=arubaoss_required_if,
         argument_spec=module_args,
         supports_check_mode=True
     )
