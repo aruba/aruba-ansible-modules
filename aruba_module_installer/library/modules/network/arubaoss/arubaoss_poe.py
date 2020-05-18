@@ -33,7 +33,7 @@ description:
     - "This implements rest apis which can be used to configure PoE"
 
 extends_documentation_fragment:
-    - arubaoss
+    - arubaoss_rest
 
 options:
     command:
@@ -91,7 +91,7 @@ EXAMPLES = '''
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.network.arubaoss.arubaoss import run_commands
-from ansible.module_utils.network.arubaoss.arubaoss import arubaoss_argument_spec
+from ansible.module_utils.network.arubaoss.arubaoss import arubaoss_argument_spec, arubaoss_required_if
 from ansible.module_utils.network.arubaoss.arubaoss import get_config
 import json
 
@@ -250,6 +250,7 @@ def run_module():
     result = dict(changed=False,warnings='Not Supported')
 
     module = AnsibleModule(
+        required_if=arubaoss_required_if,
         argument_spec=module_args,
         supports_check_mode=True
     )

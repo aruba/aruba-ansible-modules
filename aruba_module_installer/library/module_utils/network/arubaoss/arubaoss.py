@@ -80,6 +80,8 @@ arubaoss_top_spec = {
 
 arubaoss_argument_spec.update(arubaoss_top_spec)
 
+arubaoss_required_if = [('use_ssl', 'true', ['api_version'])] # For REST modules, if use_ssl is true, api_version must be set.
+
 
 def get_provider_argspec():
     return arubaoss_provider_spec

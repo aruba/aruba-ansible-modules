@@ -35,7 +35,7 @@ description:
        the reboot to device"
 
 extends_documentation_fragment:
-    - arubaoss
+    - arubaoss_rest
 
 options:
     boot_image:
@@ -65,7 +65,7 @@ EXAMPLES = '''
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.network.arubaoss.arubaoss import run_commands,get_config
-from ansible.module_utils.network.arubaoss.arubaoss import arubaoss_argument_spec
+from ansible.module_utils.network.arubaoss.arubaoss import arubaoss_argument_spec, arubaoss_required_if
 from time import sleep, time
 
 
@@ -133,6 +133,7 @@ def run_module():
     result = dict(changed=False,warnings='Not Supported')
 
     module = AnsibleModule(
+        required_if=arubaoss_required_if,
         argument_spec=module_args,
         supports_check_mode=True
     )
