@@ -75,10 +75,14 @@ arubaoss_top_spec = {
     'timeout': dict(removed_in_version=2.9, type='int'),
     'use_ssl': dict(type='bool'),
     'validate_certs': dict(type='bool',default=False),
-    'api_version': dict(type='str',default='None'),
+    'api_version': dict(type='str'),
 }
 
 arubaoss_argument_spec.update(arubaoss_top_spec)
+
+arubaoss_required_if = [
+    ('use_ssl', True, ['api_version']) # For REST modules, if use_ssl is true, api_version must be set.
+] 
 
 
 def get_provider_argspec():

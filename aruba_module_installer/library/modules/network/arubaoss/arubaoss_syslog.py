@@ -32,6 +32,9 @@ version_added: "2.6"
 description:
     - "This implements rest api's which configure syslog on device"
 
+extends_documentation_fragment:
+    - arubaoss_rest
+
 options:
     server_address:
         description:
@@ -84,7 +87,7 @@ EXAMPLES = '''
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.network.arubaoss.arubaoss import run_commands,get_config
-from ansible.module_utils.network.arubaoss.arubaoss import arubaoss_argument_spec
+from ansible.module_utils.network.arubaoss.arubaoss import arubaoss_argument_spec, arubaoss_required_if
 import sys
 
 def config_syslog(module):
@@ -150,6 +153,7 @@ def run_module():
     result = dict(changed=False,warnings='Not Supported')
 
     module = AnsibleModule(
+        required_if=arubaoss_required_if,
         argument_spec=module_args,
         supports_check_mode=True
     )

@@ -34,6 +34,9 @@ description:
     - "This implement rest api's which can be use to manage and configure
        user on the device. Can configure only operator role via REST"
 
+extends_documentation_fragment:
+    - arubaoss_rest
+
 options:
     user_name:
         description:
@@ -91,7 +94,7 @@ EXAMPLES = '''
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.network.arubaoss.arubaoss import run_commands,get_config
-from ansible.module_utils.network.arubaoss.arubaoss import arubaoss_argument_spec
+from ansible.module_utils.network.arubaoss.arubaoss import arubaoss_argument_spec, arubaoss_required_if
 from ansible.module_utils._text import to_text
 
 
@@ -161,6 +164,7 @@ def run_module():
     result = dict(changed=False,warnings='Not Supported')
 
     module = AnsibleModule(
+        required_if=arubaoss_required_if,
         argument_spec=module_args,
         supports_check_mode=True
     )

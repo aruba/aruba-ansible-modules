@@ -32,6 +32,9 @@ version_added: "2.6"
 description:
     - "This implements routing rest api to enable/disable routing on device"
 
+extends_documentation_fragment:
+    - arubaoss_rest
+
 options:
     state:
         description:
@@ -57,7 +60,7 @@ EXAMPLES = '''
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.network.arubaoss.arubaoss import run_commands
-from ansible.module_utils.network.arubaoss.arubaoss import arubaoss_argument_spec
+from ansible.module_utils.network.arubaoss.arubaoss import arubaoss_argument_spec, arubaoss_required_if
 
 
 def routing(module):
@@ -88,6 +91,7 @@ def run_module():
 
 
     module = AnsibleModule(
+        required_if=arubaoss_required_if,
         argument_spec=module_args,
         supports_check_mode=True
     )

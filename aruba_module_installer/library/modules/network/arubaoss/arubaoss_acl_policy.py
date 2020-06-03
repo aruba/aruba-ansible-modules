@@ -33,6 +33,9 @@ description:
     - "This implements rest api's which will configure acl policies
        standard and extended onto device"
 
+extends_documentation_fragment:
+    - arubaoss_rest
+    
 options:
   acl_name:
     description:
@@ -273,7 +276,7 @@ message:
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.network.arubaoss.arubaoss import run_commands,get_config
-from ansible.module_utils.network.arubaoss.arubaoss import arubaoss_argument_spec
+from ansible.module_utils.network.arubaoss.arubaoss import arubaoss_argument_spec, arubaoss_required_if
 from ansible.module_utils._text import to_text
 
 
@@ -613,6 +616,7 @@ def run_module():
     result = dict(changed=False,warnings='Not Supported')
 
     module = AnsibleModule(
+        required_if=arubaoss_required_if,
         argument_spec=module_args,
         supports_check_mode=True
     )

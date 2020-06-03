@@ -32,6 +32,9 @@ version_added: "2.6"
 description:
     - "This implements rest api's which configure snmp on device"
 
+extends_documentation_fragment:
+    - arubaoss_rest
+
 options:
     commmunity_nme:
         description:
@@ -222,7 +225,7 @@ EXAMPLES = '''
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.network.arubaoss.arubaoss import run_commands,get_config
-from ansible.module_utils.network.arubaoss.arubaoss import arubaoss_argument_spec
+from ansible.module_utils.network.arubaoss.arubaoss import arubaoss_argument_spec, arubaoss_required_if
 
 
 def community(module):
@@ -353,6 +356,7 @@ def run_module():
     resuult = dict(changed=False,warnings='Not Supported')
 
     module = AnsibleModule(
+        required_if=arubaoss_required_if,
         argument_spec=module_args,
         supports_check_mode=True
     )

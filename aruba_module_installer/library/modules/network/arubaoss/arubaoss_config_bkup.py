@@ -36,6 +36,9 @@ description:
        task. Defualt module action is to restore the configuration.
        Use config_type for configuration backup"
 
+extends_documentation_fragment:
+    - arubaoss_rest
+    
 options:
     filne_name:
         description:
@@ -116,7 +119,7 @@ EXAMPLES = '''
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.network.arubaoss.arubaoss import run_commands,get_config
-from ansible.module_utils.network.arubaoss.arubaoss import arubaoss_argument_spec
+from ansible.module_utils.network.arubaoss.arubaoss import arubaoss_argument_spec, arubaoss_required_if
 from ansible.module_utils._text import to_text
 from time import sleep
 
@@ -265,6 +268,7 @@ def run_module():
     result = dict(changed=False,warnings='Not Supported')
 
     module = AnsibleModule(
+        required_if=arubaoss_required_if,
         argument_spec=module_args,
         supports_check_mode=True
     )
