@@ -82,7 +82,7 @@ arubaoss_argument_spec.update(arubaoss_top_spec)
 
 arubaoss_required_if = [
     ('use_ssl', True, ['api_version']) # For REST modules, if use_ssl is true, api_version must be set.
-] 
+]
 
 
 def get_provider_argspec():
@@ -136,6 +136,21 @@ class Checkversion:
 
         return response, headers
 
+    def set_username_password(self):
+
+        url = self._url + "/management-user"
+        data = {"name": self._module.params['username'] ,
+                "password": self._module.params['password'],
+                "password_type":"PET_PLAIN_TEXT",
+                "type":"UT_MANAGER"}
+        data = self._module.jsonify(data)
+
+        response, headers = self._send(url, body=data)
+
+        if headers['status'] == 201:
+            self.login()
+        else:
+            self._module.fail_json(**headers)
 
     def login(self):
         ''' Created login uri and saves cookie'''
@@ -151,6 +166,8 @@ class Checkversion:
 
         if headers['status'] == 201:
             self._cookie = headers.get('set-cookie')
+        elif headers['status'] == 401:
+            self.set_username_password()
         elif headers['status'] == 404:
             self._module.fail_json(msg='AOS-Switch Ansible support needs minimum Firmware version of 16.08.xx', data='')
         else:
@@ -204,6 +221,10 @@ def get_connection(module, is_cli=False):
                 return module._arubaoss_connection
             module._arubaoss_connection = Connection(module._socket_path)
             _DEVICE_CONNECTION = module._arubaoss_connection
+            # when CLI module is used, below load_params function is used to
+            # set the username and password.
+            temp_module = module
+            load_params(temp_module)
             return module._arubaoss_connection
         else:
             load_params(module)
