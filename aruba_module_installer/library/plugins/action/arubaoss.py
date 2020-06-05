@@ -39,7 +39,7 @@ class ActionModule(_ActionModule):
 
         socket_path = None
 
-        if self._play_context.connection == 'local':
+        if self._play_context.connection == 'local' or self._play_context.connection == 'network_cli':
             provider = load_provider(arubaoss_provider_spec, self._task.args)
             transport = provider['transport'] or 'aossapi'
 
@@ -80,7 +80,10 @@ class ActionModule(_ActionModule):
             provider['timeout'] = C.PERSISTENT_COMMAND_TIMEOUT
 
         if provider.get('username') is None:
-            provider['username'] = play_context.connection_user
+            if play_context.connection == 'network_cli':
+                provider['username'] = play_context.remote_user
+            else:
+                provider['username'] = play_context.connection_user
 
         if provider.get('password') is None:
             provider['password'] = play_context.password
