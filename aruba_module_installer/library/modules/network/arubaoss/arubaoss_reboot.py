@@ -94,7 +94,7 @@ def reboot(module):
     status_url = '/system/status'
     result = get_config(module, status_url)
     if not result:
-        return {'msg':'Could not get devcie status. Not rebooted!','changed':False,
+        return {'msg':'Could not get device status. Not rebooted!','changed':False,
                 'failed':True}
 
     data = {
