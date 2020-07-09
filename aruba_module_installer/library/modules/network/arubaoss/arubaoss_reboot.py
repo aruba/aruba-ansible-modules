@@ -66,6 +66,7 @@ EXAMPLES = '''
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.network.arubaoss.arubaoss import run_commands,get_config
 from ansible.module_utils.network.arubaoss.arubaoss import arubaoss_argument_spec, arubaoss_required_if
+from ansible.module_utils.network.arubaoss.arubaoss import get_firmware
 from time import sleep, time
 
 
@@ -91,10 +92,9 @@ def reboot(module):
     params = module.params
     url = '/system/reboot'
 
-    status_url = '/system/status'
-    result = get_config(module, status_url)
+    result = get_firmware(module)
     if not result:
-        return {'msg':'Could not get devcie status. Not rebooted!','changed':False,
+        return {'msg':'Could not get device status. Not rebooted!','changed':False,
                 'failed':True}
 
     data = {
