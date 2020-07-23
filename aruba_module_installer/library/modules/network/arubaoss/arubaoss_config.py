@@ -163,6 +163,11 @@ options:
         which should be set to "intended."
     required: False
     type: str
+  candidate_config:
+    description:
+      - Specifies whether the intended_config is seen as a baseline or as a candidate configuration. Changes the before and after state of the 'diff'.
+    required: False
+    type: bool
 '''  # NOQA
 
 EXAMPLES = '''
@@ -280,6 +285,7 @@ def main():
 
         running_config=dict(aliases=['config']),
         intended_config=dict(),
+        candidate_config=dict(type='bool', default=False),
 
         backup=dict(type='bool', default=False),
         backup_options=dict(type='dict', options=backup_spec),
@@ -428,6 +434,13 @@ def main():
                 contents=contents, ignore_lines=diff_ignore_lines)
 
             if running_config.sha1 != base_config.sha1:
+              if module.params['candidate_config']:
+                result.update({
+                    'changed': True,
+                    'diff': {'before': str(running_config),
+                             'after': str(base_config)}
+                })
+              else:
                 result.update({
                     'changed': True,
                     'diff': {'before': str(base_config),
