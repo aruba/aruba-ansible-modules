@@ -221,10 +221,6 @@ def get_connection(module, is_cli=False):
                 return module._arubaoss_connection
             module._arubaoss_connection = Connection(module._socket_path)
             _DEVICE_CONNECTION = module._arubaoss_connection
-            # when CLI module is used, below load_params function is used to
-            # set the username and password.
-            temp_module = module
-            load_params(temp_module)
             return module._arubaoss_connection
         else:
             load_params(module)
