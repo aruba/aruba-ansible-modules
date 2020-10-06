@@ -122,7 +122,7 @@ options:
             - Tos value
         required: false
         choices: 0, 2, 4, 8
-    sequece_no:
+    sequence_no:
         description:
             - Sequence number for the traffic class configured
         required: false
