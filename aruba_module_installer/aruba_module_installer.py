@@ -22,6 +22,7 @@ from os.path import dirname, realpath, exists, isdir
 from os import remove
 from sys import exit
 from re import search
+from packaging import version
 import errno
 
 
@@ -154,7 +155,7 @@ def find_module_path():
         re_path = re_path.groupdict()['path']
 
         # Validate Ansible version is supported
-        if '2.5' <= re_version <= '2.9.9':
+        if version.parse('2.5') <= version.parse(re_version) <= version.parse('2.9.9'):
             return re_path+'/'
         else:
             exit(COLORRED.format('There was an issue with your '
