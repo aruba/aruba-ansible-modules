@@ -112,6 +112,6 @@ accepted.
 | [aruba-switching-automation@hpe.com][email-link] | Distribution list email to contact the switching automation technical marketing engineering team. |
 
 
-[airheads-link]: https://community.arubanetworks.com/t5/Developer-Community/bd-p/DeveloperCommunity
-[aruba-bots-playlist-link]: https://www.youtube.com/playlist?list=PLsYGHuNuBZcYzoh7OIWLTyBJf-ahvE70k
-[email-link]: mailto:aruba-switching-automation@hpe.com
+[airheads-link]: https://community.arubanetworks.com/community-home?CommunityKey=ea467413-8db4-4c49-b5f8-1a12f193e959
+[aruba-bots-playlist-link]: https://www.youtube.com/watch?v=_QxwUiXkJpA&list=PLsYGHuNuBZcY02FUh95ZpOB5VFkPurVaX
+[email-link]: mailto:aruba-automation@hpe.com
