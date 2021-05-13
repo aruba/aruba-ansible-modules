@@ -1,3 +1,19 @@
+:warning: :warning: :warning: :warning: :warning: 
+
+**_This repository is deprecated._**
+
+**_For all Aruba created Ansible content visit [ArubaNetworks on Galaxy](https://galaxy.ansible.com/arubanetworks)._**
+
+**_For official AOS-Switch Ansible [Collection](https://galaxy.ansible.com/arubanetworks/aos_switch)._**  
+
+**_For official Central Ansible [Role](https://galaxy.ansible.com/arubanetworks/aruba_central_role)._**  
+
+**_For official WLAN Ansible [Role](https://galaxy.ansible.com/arubanetworks/aos_wlan_role)._**  
+
+**_For official AOS-CX automation with Ansible guides and workflows visit Aruba's [Developer Hub](https://developer.arubanetworks.com/aruba-aoscx)._**  
+
+:warning: :warning: :warning: :warning: :warning: 
+
 # aruba-ansible-modules
 All Ansible modules, module installer, and example playbooks for AOS-Switch and WLAN products.
  For AOS-CX modules please see our AOS-CX Ansible Role in [Ansible's Galaxy](https://galaxy.ansible.com/arubanetworks/aoscx_role).
